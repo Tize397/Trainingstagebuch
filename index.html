@@ -180,6 +180,11 @@ table.rect{width:100%;font-size:13px;border-collapse:collapse}
 table.rect td{padding:4px 2px;border-bottom:1px solid var(--line)}
 .tachos.two{grid-template-columns:repeat(2,minmax(0,110px));justify-content:center;gap:24px}
 .news{padding-left:20px;margin:12px 0 16px}.news li{margin:8px 0;line-height:1.4}
+.set{grid-template-columns:38px minmax(0,1fr) minmax(0,1fr) 38px 22px}
+.sethead{grid-template-columns:38px minmax(0,1fr) minmax(0,1fr) 38px 22px}
+.set.bw,.sethead.bw{grid-template-columns:38px minmax(0,1fr) 38px 22px}
+.sdel{padding:0;width:22px;height:30px;border:none;background:transparent;color:var(--tx2);font-size:13px}
+.exo{padding:6px 4px;border-bottom:1px solid var(--line);font-size:14px}.exo.on{background:var(--acc2);border-radius:8px}
 
 </style>
 </head>
@@ -196,10 +201,11 @@ table.rect td{padding:4px 2px;border-bottom:1px solid var(--line)}
 <input type="file" id="backupIn" accept=".json,application/json" hidden>
 <script>
 "use strict";
-const VERSION='1.8.0';
+const VERSION='1.9.0';
 /* ---------- Grunddaten ---------- */
-const BASE_SPORTS={kraft:{n:'Kraft',i:'🏋️'},hyrox:{n:'Hyrox',i:'🔥'},laufen:{n:'Laufen',i:'🏃'},gravel:{n:'Gravelbike',i:'🚴'},spinning:{n:'Spinning',i:'🚲'},schwimmen:{n:'Schwimmen',i:'🏊'},wandern:{n:'Wandern',i:'🥾'},padel:{n:'Padel',i:'🎾'},squash:{n:'Squash',i:'🟡'},handball:{n:'Handball',i:'🤾'},golf:{n:'Golf',i:'⛳'},yoga:{n:'Yoga',i:'🧘'},ski:{n:'Skifahren',i:'⛷️'},langlauf:{n:'Langlauf',i:'🎿'},koordination:{n:'Koordination',i:'🤹'},dehnen:{n:'Dehnen',i:'🤸'},sonst:{n:'Allgemein',i:'✨'}};
-const KINDS={laufen:['Locker','Tempo','Intervall','Lang','Fahrtspiel'],hyrox:['Training','Simulation'],schwimmen:['Becken','Freiwasser'],ski:['Piste','Freeride','Skitour'],langlauf:['Klassisch','Skating'],yoga:['Yin','Restorative','Hatha','Vinyasa','Power/Ashtanga','Mobility'],golf:['9 Loch','18 Loch','Driving Range','Training'],spinning:['Kurs','Intervalle','Locker'],gravel:['Locker','Intervalle','Lang'],koordination:['Jonglieren','Balance','Reaktion','Gemischt'],dehnen:['Ganzkörper','Nach dem Training','Mobility'],handball:['Training','Spiel']};
+const STR=s=>s==='kraft'||s==='home';
+const BASE_SPORTS={kraft:{n:'Kraft',i:'🏋️'},home:{n:'Homeworkout',i:'🏠'},hyrox:{n:'Hyrox',i:'🔥'},laufen:{n:'Laufen',i:'🏃'},gravel:{n:'Gravelbike',i:'🚴'},spinning:{n:'Spinning',i:'🚲'},schwimmen:{n:'Schwimmen',i:'🏊'},wandern:{n:'Wandern',i:'🥾'},padel:{n:'Padel',i:'🎾'},squash:{n:'Squash',i:'🟡'},handball:{n:'Handball',i:'🤾'},golf:{n:'Golf',i:'⛳'},yoga:{n:'Yoga',i:'🧘'},pilates:{n:'Pilates',i:'🧘‍♀️'},seil:{n:'Seilspringen',i:'🪢'},ski:{n:'Skifahren',i:'⛷️'},langlauf:{n:'Langlauf',i:'🎿'},koordination:{n:'Koordination',i:'🤹'},dehnen:{n:'Dehnen',i:'🤸'},sonst:{n:'Allgemein',i:'✨'}};
+const KINDS={laufen:['Locker','Tempo','Intervall','Lang','Fahrtspiel'],hyrox:['Training','Simulation'],schwimmen:['Becken','Freiwasser'],ski:['Piste','Freeride','Skitour'],langlauf:['Klassisch','Skating'],yoga:['Yin','Restorative','Hatha','Vinyasa','Power/Ashtanga','Mobility'],golf:['9 Loch','18 Loch','Driving Range','Training'],spinning:['Kurs','Intervalle','Locker'],gravel:['Locker','Intervalle','Lang'],koordination:['Jonglieren','Balance','Reaktion','Gemischt'],dehnen:['Ganzkörper','Nach dem Training','Mobility'],handball:['Training','Spiel'],pilates:['Matte','Reformer','Power'],seil:['Locker','Intervall','Double Unders']};
 const DIST_SPORTS=['laufen','gravel','spinning','schwimmen','wandern','langlauf','ski'];
 const HYROX_ST=['SkiErg','Sled Push','Sled Pull','Burpee Broad Jumps','Rudern','Farmers Carry','Sandbag Lunges','Wall Balls'];
 const PAINS=['Knie','Rücken','Schulter','Ellbogen','Handgelenk','Hüfte','Wade','Achilles','Fuß','Nacken'];
@@ -207,6 +213,10 @@ const MOODS=['😣','😐','🙂','😄'];
 const GROUPS=['push','pull','beine','rumpf'];
 const GN={push:'Push',pull:'Pull',beine:'Beine',rumpf:'Rumpf',ganz:'Ganzkörper'};
 const STATIONS=[[0,'Beutelsend'],[30,'Wasserau'],[85,'Bockenburg-Fähre'],[135,'Der Alte Wald'],[215,'Bree'],[400,'Wetterspitze'],[720,'Furt des Bruinen'],[740,'Bruchtal'],[1050,'Pass des Caradhras'],[1210,'Tore von Moria'],[1300,'Brücke von Khazad-dûm'],[1380,'Lothlórien'],[1820,'Fälle von Rauros'],[2000,'Emyn Muil'],[2250,'Das Schwarze Tor'],[2450,'Ithilien'],[2700,'Cirith Ungol'],[2860,'Schicksalsberg'],[3300,'Minas Tirith'],[3900,'Edoras'],[4600,'Zurück in Bruchtal'],[5700,'Heimkehr ins Auenland'],[6100,'Graue Anfurten']];
+const DEF_HOME=[
+ {id:'h1',sport:'home',name:'Ganzkörper ohne Geräte',ex:[['Liegestütze',3,12],['Kniebeugen (Körpergewicht)',3,20],['Ausfallschritte',3,12],['Glute Bridge',3,15],['Plank (Sek.)',3,45],['Superman',3,12]]},
+ {id:'h2',sport:'home',name:'HIIT zuhause',ex:[['Burpees',4,10],['Hampelmann',4,30],['Jump Squats',4,15],['Mountain Climbers',4,20],['Bärengang (Sek.)',3,30]]},
+ {id:'h3',sport:'home',name:'Core zuhause',ex:[['Dead Bug',3,12],['Seitstütz (Sek.)',3,30],['Fahrrad-Crunches',3,20],['Bird Dog',3,12],['Hohlkörper (Sek.)',3,30]]}];
 const DEF_KRAFT=[
  {id:'t1',sport:'kraft',name:'Push-Tag',ex:[['Bankdrücken',3,8],['Schulterdrücken',3,10],['Dips',3,10],['Seitheben',3,12],['Trizepsdrücken',3,12]]},
  {id:'t2',sport:'kraft',name:'Pull-Tag',ex:[['Klimmzüge',4,6],['Langhantelrudern',3,10],['Latzug',3,10],['Bizepscurls',3,12],['Face Pulls',3,15]]},
@@ -224,15 +234,22 @@ const MUS=[['brust','Brust'],['schultern','Schultern'],['bizeps','Bizeps'],['tri
 const MN=Object.fromEntries(MUS);const MK=MUS.map(x=>x[0]);
 const MS={brust:'Brust',schultern:'Schulter',bizeps:'Bizeps',trizeps:'Trizeps',unterarme:'Unterarm',bauch:'Bauch',ruecken:'Rücken',unterruecken:'u. Rücken',gesaess:'Gesäß',quads:'Obersch. v.',hamstrings:'Obersch. h.',waden:'Waden'};
 const DEF_EX=[
- ['Bankdrücken','brust','trizeps schultern'],['Schrägbankdrücken','brust','schultern trizeps'],['Kurzhantel-Bankdrücken','brust','trizeps schultern'],['Bankdrücken eng','trizeps','brust schultern'],['Butterfly','brust','schultern'],['Liegestütze','brust','trizeps schultern bauch'],['Dips','brust trizeps','schultern'],
+ ['Bankdrücken','brust','trizeps schultern'],['Schrägbankdrücken','brust','schultern trizeps'],['Kurzhantel-Bankdrücken','brust','trizeps schultern'],['Bankdrücken eng','trizeps','brust schultern'],['Butterfly','brust','schultern'],['Liegestütze','brust','trizeps schultern bauch',0,1],['Dips','brust trizeps','schultern',0,1],
  ['Schulterdrücken','schultern','trizeps'],['Arnold Press','schultern','trizeps'],['Seitheben','schultern',''],['Face Pulls','schultern ruecken',''],['Trizepsdrücken','trizeps',''],['French Press','trizeps',''],
- ['Klimmzüge','ruecken','bizeps unterarme'],['Latzug','ruecken','bizeps'],['Langhantelrudern','ruecken','bizeps unterruecken'],['Kurzhantelrudern','ruecken','bizeps'],['Kabelrudern','ruecken','bizeps'],['Shrugs','ruecken','unterarme'],
+ ['Klimmzüge','ruecken','bizeps unterarme',0,1],['Latzug','ruecken','bizeps'],['Langhantelrudern','ruecken','bizeps unterruecken'],['Kurzhantelrudern','ruecken','bizeps'],['Kabelrudern','ruecken','bizeps'],['Shrugs','ruecken','unterarme'],
  ['Bizepscurls','bizeps','unterarme'],['Hammercurls','bizeps unterarme',''],
  ['Kniebeugen','quads gesaess','unterruecken bauch'],['Frontkniebeugen','quads','gesaess bauch'],['Kreuzheben','unterruecken gesaess hamstrings','ruecken unterarme quads'],['Rumänisches Kreuzheben','hamstrings gesaess','unterruecken'],
  ['Ausfallschritte','quads gesaess','hamstrings'],['Bulgarian Split Squats','quads gesaess','hamstrings'],['Beinpresse','quads','gesaess'],['Beinstrecker','quads',''],['Beinbeuger','hamstrings',''],['Hip Thrust','gesaess','hamstrings'],['Wadenheben','waden',''],
- ['Plank (Sek.)','bauch','schultern',1],['Seitstütz (Sek.)','bauch','schultern',1],['Wandsitzen (Sek.)','quads','gesaess',1],['Dead Hang (Sek.)','unterarme','ruecken',1],['Hohlkörper (Sek.)','bauch','',1],['Crunches','bauch',''],['Beinheben hängend','bauch','unterarme'],['Russian Twists','bauch',''],['Ab Wheel','bauch','schultern'],['Rückenstrecker','unterruecken','gesaess'],
- ['Kettlebell Swings','gesaess hamstrings','unterruecken schultern'],['Thrusters','quads schultern','gesaess trizeps'],['Burpees','brust quads','schultern bauch'],['Wall Balls','quads schultern','gesaess']
-].map(([n,m,s,t])=>({n,m:m.split(' ').filter(Boolean),s:s.split(' ').filter(Boolean),...(t?{t:1}:{})}));
+ ['Plank (Sek.)','bauch','schultern',1],['Seitstütz (Sek.)','bauch','schultern',1],['Wandsitzen (Sek.)','quads','gesaess',1],['Dead Hang (Sek.)','unterarme','ruecken',1],['Hohlkörper (Sek.)','bauch','',1],['Crunches','bauch','',0,1],['Beinheben hängend','bauch','unterarme',0,1],['Russian Twists','bauch','',0,1],['Ab Wheel','bauch','schultern',0,1],['Rückenstrecker','unterruecken','gesaess',0,1],
+ ['Kettlebell Swings','gesaess hamstrings','unterruecken schultern'],['Thrusters','quads schultern','gesaess trizeps'],['Burpees','brust quads','schultern bauch',0,1],['Wall Balls','quads schultern','gesaess']
+ ,['Kurzhantel-Schrägbankdrücken','brust','schultern trizeps'],['Kabelzug-Crossover','brust','schultern'],['Diamond-Liegestütze','trizeps brust','schultern',0,1],['Liegestütze erhöht','brust','trizeps schultern',0,1],
+ ['Frontheben','schultern',''],['Reverse Flys','schultern ruecken',''],['Aufrechtes Rudern','schultern','ruecken bizeps'],['Pike-Liegestütze','schultern','trizeps',0,1],
+ ['T-Bar-Rudern','ruecken','bizeps unterruecken'],['Pullover','ruecken brust','trizeps'],['Inverted Rows','ruecken','bizeps',0,1],['Good Mornings','hamstrings unterruecken','gesaess'],['Superman','unterruecken','gesaess',0,1],
+ ['SZ-Curls','bizeps','unterarme'],['Konzentrationscurls','bizeps',''],['Trizeps-Kickbacks','trizeps',''],['Bankdips','trizeps','brust schultern',0,1],['Unterarmcurls','unterarme',''],
+ ['Goblet Squat','quads gesaess','bauch'],['Sumo-Kreuzheben','gesaess quads','hamstrings unterruecken'],['Hackenschmidt','quads','gesaess'],['Step-ups','quads gesaess','hamstrings'],['Kniebeugen (Körpergewicht)','quads gesaess','',0,1],['Jump Squats','quads gesaess','waden',0,1],['Pistol Squats','quads gesaess','bauch',0,1],['Glute Bridge','gesaess','hamstrings',0,1],['Nordic Curls','hamstrings','',0,1],['Seitliche Ausfallschritte','quads gesaess','hamstrings',0,1],['Wadenheben einbeinig','waden','',0,1],
+ ['Mountain Climbers','bauch','schultern quads',0,1],['Dead Bug','bauch','',0,1],['Bird Dog','unterruecken bauch','gesaess',0,1],['Fahrrad-Crunches','bauch','',0,1],['Toes to Bar','bauch','unterarme ruecken',0,1],['Hollow Rocks','bauch','',0,1],['Pallof Press','bauch','schultern'],['Holzhacker am Kabel','bauch','schultern'],
+ ['Box Jumps','quads gesaess','waden',0,1],['Hampelmann','waden quads','schultern',0,1],['Skippings','quads waden','bauch',0,1],['Ball Slams','schultern bauch','ruecken quads'],['Turkish Get-up','schultern bauch','gesaess quads'],['Farmer\'s Walk (Sek.)','unterarme ruecken','bauch quads',1],['Bärengang (Sek.)','schultern bauch','quads',1,1],['Sled Push','quads gesaess','waden schultern'],['Sandsack-Ausfallschritte','quads gesaess','bauch'],['Burpee Broad Jumps','quads brust','gesaess schultern',0,1]
+].map(([n,m,s,t,b])=>({n,m:m.split(' ').filter(Boolean),s:s.split(' ').filter(Boolean),...(t?{t:1}:{}),...(b?{bw:1}:{})}));
 const G2M={push:[['brust'],['trizeps','schultern']],pull:[['ruecken'],['bizeps']],beine:[['quads','gesaess'],['hamstrings']],rumpf:[['bauch'],['unterruecken']],ganz:[['brust','ruecken','quads'],['schultern','bauch']]};
 const KEY='ttb.v1';
 let mem=null;
@@ -242,23 +259,26 @@ const DEF_ROUT=[
  {id:'r2',sport:'dehnen',name:'Nach dem Laufen',steps:[R('Waden an der Wand',30,1),R('Oberschenkel vorne im Stand',30,1),R('Oberschenkel hinten',30,1),R('Hüftbeuger',30,1),R('Gesäß (Figur 4)',30,1),R('Adduktoren im breiten Stand',40)]},
  {id:'r3',sport:'dehnen',name:'Hüfte & Rücken',steps:[R('Katze-Kuh',45),R('Kindhaltung',45),R('90/90 Hüftrotation',45,1),R('Taube',60,1),R('Drehsitz',30,1),R('Knie zur Brust',45)]},
  {id:'r4',sport:'koordination',name:'Jonglieren & Balance',steps:[R('Jonglieren mit 3 Bällen',120),RP(30),R('Einbeinstand mit geschlossenen Augen',30,1),R('Ball gegen die Wand, Hände abwechselnd',60),R('Seilspringen mit Varianten',60),RP(30),R('Jonglieren mit 3 Bällen',120),R('Koordinationsleiter',90)]},
- {id:'r5',sport:'koordination',name:'Reaktion & Gleichgewicht',steps:[R('Einbeinstand mit Ballwurf',30,1),R('Tennisball fallen lassen und fangen',60),R('Überkreuz-Hampelmann',45),R('Standwaage',30,1),R('Jonglieren: 2 Bälle mit einer Hand',60,1)]}];
-function blank(){return{entries:[],templates:JSON.parse(JSON.stringify([...DEF_KRAFT,...DEF_AUSDAUER,...DEF_ROUT])),exercises:JSON.parse(JSON.stringify(DEF_EX)),customSports:[],gear:[],goals:[],settings:{maxHr:190,plan:4,bikeFactor:0.33,minPerKm:10,morning:false,devRecovery:false,askedDev:0,sex:null,birth:null,show1rm:false},seenVer:VERSION,recovery:{},hyroxPlan:{runs:[],st:[]},live:null,migr:4,lastBackup:null}}
+ {id:'r5',sport:'koordination',name:'Reaktion & Gleichgewicht',steps:[R('Einbeinstand mit Ballwurf',30,1),R('Tennisball fallen lassen und fangen',60),R('Überkreuz-Hampelmann',45),R('Standwaage',30,1),R('Jonglieren: 2 Bälle mit einer Hand',60,1)]},
+ {id:'r6',sport:'seil',name:'Seil-Intervalle 10 × 1 min',steps:[...Array(10)].flatMap((_,i)=>i<9?[R('Springen',60),RP(30)]:[R('Springen',60)])},
+ {id:'r7',sport:'seil',name:'Seilspringen 3 × 5 min',steps:[R('Springen',300),RP(60),R('Springen',300),RP(60),R('Springen',300)]}];
+function blank(){return{entries:[],templates:JSON.parse(JSON.stringify([...DEF_KRAFT,...DEF_HOME,...DEF_AUSDAUER,...DEF_ROUT])),exercises:JSON.parse(JSON.stringify(DEF_EX)),customSports:[],gear:[],goals:[],settings:{maxHr:190,plan:4,bikeFactor:0.33,minPerKm:10,morning:false,devRecovery:false,askedDev:0,sex:null,birth:null,show1rm:false},seenVer:VERSION,recovery:{},hyroxPlan:{runs:[],st:[]},live:null,migr:5,lastBackup:null}}
 function migrate(d){const hadMigr=!!d.migr;const b=blank();d=Object.assign(b,d);d.migr=hadMigr?d.migr:0;d.settings=Object.assign(blank().settings,d.settings);if(!d.hyroxPlan||!d.hyroxPlan.runs)d.hyroxPlan={runs:[],st:[]};
  d.templates.forEach(t=>{if(!t.sport)t.sport='kraft'});
- if(!d.migr){if(!d.templates.some(t=>t.sport!=='kraft'))d.templates.push(...JSON.parse(JSON.stringify(DEF_AUSDAUER)));d.migr=1}
+ if(!d.migr){if(!d.templates.some(t=>!STR(t.sport)))d.templates.push(...JSON.parse(JSON.stringify(DEF_AUSDAUER)));d.migr=1}
  if(d.migr<2){DEF_ROUT.forEach(r=>{if(!d.templates.some(t=>t.id===r.id))d.templates.push(JSON.parse(JSON.stringify(r)))});d.migr=2}
  if(d.migr<3){const S={1:2,2:3,3:4,4:5},T={1:4,2:3,3:2,4:1};for(const k in(d.checks||{})){const c=d.checks[k];if(!c||c.skip||c.v===2)continue;d.checks[k]={v:2,sleep:S[c.sleep]||3,tired:T[c.mood]||3,sore:c.sore||1}}if(d.polar)d.settings.askedDev=1;d.migr=3}
  if(d.migr<4){for(const e of d.entries||[])if(e.sport==='yoga'){if(!e.kind||e.kind==='Yoga')e.kind='Hatha';else if(e.kind==='Dehnen')e.kind='Yin'}if(d.settings.show1rm===undefined)d.settings.show1rm=false;d.migr=4}
+ if(d.migr<5){[...DEF_HOME,...DEF_ROUT].forEach(r=>{if(!d.templates.some(t=>t.id===r.id))d.templates.push(JSON.parse(JSON.stringify(r)))});d.migr=5}
  if(!d.recovery||typeof d.recovery!=='object')d.recovery={};
  if(!Array.isArray(d.exercises)||!d.exercises.length)d.exercises=JSON.parse(JSON.stringify(DEF_EX));
- d.exercises=d.exercises.map(x=>{if(x.m){const df=DEF_EX.find(y=>y.n.toLowerCase()===x.n.toLowerCase());if(df&&df.t&&x.t===undefined)x.t=1;return x}const def=DEF_EX.find(y=>y.n.toLowerCase()===x.n.toLowerCase());if(def)return JSON.parse(JSON.stringify(def));const g=G2M[x.g]||G2M.ganz;const r={n:x.n,m:[...g[0]],s:[...g[1]]};if(x.g2&&G2M[x.g2])r.s=[...new Set([...r.s,...G2M[x.g2][0]])];return r});
+ d.exercises=d.exercises.map(x=>{if(x.m){const df=DEF_EX.find(y=>y.n.toLowerCase()===x.n.toLowerCase());if(df&&df.t&&x.t===undefined)x.t=1;if(df&&df.bw&&x.bw===undefined)x.bw=1;return x}const def=DEF_EX.find(y=>y.n.toLowerCase()===x.n.toLowerCase());if(def)return JSON.parse(JSON.stringify(def));const g=G2M[x.g]||G2M.ganz;const r={n:x.n,m:[...g[0]],s:[...g[1]]};if(x.g2&&G2M[x.g2])r.s=[...new Set([...r.s,...G2M[x.g2][0]])];return r});
  DEF_EX.forEach(y=>{if(!d.exercises.some(x=>x.n.toLowerCase()===y.n.toLowerCase()))d.exercises.push(JSON.parse(JSON.stringify(y)))});if(!Array.isArray(d.customSports))d.customSports=[];
  d.entries.forEach(e=>{if(e.sport==='sonst'&&!e.title)e.title='';if(e.kind==='Wettkampf'){e.race=e.race||{};e.kind=null}});return d}
 const isRace=e=>!!(e&&e.race);
 
 /* Kurzinfo nach Updates */
-const NEWS={'1.8.0':['🧘 Yoga-Arten: Yin, Restorative, Hatha, Vinyasa, Power/Ashtanga, Mobility – jede wirkt unterschiedlich auf die Belastung','👤 Geschlecht und Geburtsjahr unter Persönliches (freiwillig) – für Maximalpuls-Schätzung und Belastung','❤️ Genauere Herz-Kreislauf-Belastung: gewichtet harte Pulsbereiche stärker und nutzt deinen Ruhepuls von Polar','🏋️ 1RM-Anzeige ist jetzt optional – Haken in der Statistik bei den Bestleistungen'],
+const NEWS={'1.9.0':['🏆 Tageserfolge wiederholen sich im Monat nicht mehr, dazu viele neue Lebenserfolge und Bestleistungs-Erfolge (neue Bestzeit, neues Gewicht)','🙈 Erfolge erscheinen erst, wenn du sie erreicht hast','🏠 Neue Sportarten: Homeworkout (mit Übungen und Sätzen), Pilates, Seilspringen','💪 Rund 40 neue Übungen; Übungen ohne Gewicht zeigen nur Wiederholungen (mit „+ kg“ für Zusatzgewicht)','✋ Im Training: Übung lange drücken zum Umsortieren, Ersetzen oder Entfernen; Sätze lassen sich löschen'],'1.8.0':['🧘 Yoga-Arten: Yin, Restorative, Hatha, Vinyasa, Power/Ashtanga, Mobility – jede wirkt unterschiedlich auf die Belastung','👤 Geschlecht und Geburtsjahr unter Persönliches (freiwillig) – für Maximalpuls-Schätzung und Belastung','❤️ Genauere Herz-Kreislauf-Belastung: gewichtet harte Pulsbereiche stärker und nutzt deinen Ruhepuls von Polar','🏋️ 1RM-Anzeige ist jetzt optional – Haken in der Statistik bei den Bestleistungen'],
  '1.7.1':['⏱ Drei Tachos: Muskeln, Herz-Kreislauf, Erholung','☀️ Neuer Morgen-Check (Schlafqualität, Müdigkeit, Muskelkater)','🌙 Erholungsdaten von Polar: HRV, Ruhepuls, Schlaf','🤾 Handball als Sportart']};
 
 /* Speicher: IndexedDB (groß), Rückfall localStorage */
@@ -319,7 +339,7 @@ function trimpOf(e){if(e.zones){const t=e.zones.reduce((s,v,i)=>s+v/60*(i+1),0);
  if(e.hrAvg&&e.duration){const p=e.hrAvg/maxHrOf();return e.duration*(p<.6?1:p<.7?2:p<.8?3:p<.9?4:5)}return null}
 function hrRpe(e){const t=trimpOf(e);if(t==null||!e.duration)return null;return Math.min(10,Math.max(1,Math.round(2*t/e.duration)))}
 const YOGA={Yin:[2,.2],Restorative:[1,.1],Hatha:[3,.4],Vinyasa:[5,.6],'Power/Ashtanga':[7,.8],Mobility:[3,.3]};
-function rpeOf(e){if(e.rpe)return e.rpe;const h=hrRpe(e);if(h!=null)return h;if(e.sport==='yoga'&&YOGA[e.kind])return YOGA[e.kind][0];return 5}
+function rpeOf(e){if(e.rpe)return e.rpe;const h=hrRpe(e);if(h!=null)return h;if(e.sport==='yoga'&&YOGA[e.kind])return YOGA[e.kind][0];if(e.sport==='pilates')return{Matte:4,Reformer:5,Power:6}[e.kind]||4;return 5}
 /* Banister-TRIMP: Pulsreserve, exponentiell gewichtet (Faktor nach Geschlecht), Ruhepuls aus Polar-Nächten */
 const sexB=()=>db.settings.sex==='w'?1.67:db.settings.sex==='m'?1.92:1.8;
 let RH={t:0};
@@ -333,7 +353,7 @@ const hrLoad=e=>{const t=banister(e);return t==null?null:BK*t};
 let CAL=null;
 function calib(){if(CAL&&Date.now()-CAL.t<3000&&CAL.n===db.entries.length)return CAL;const r=db.entries.filter(e=>e.rpe&&e.duration>=10&&!NOHR.has(e.sport)&&trimpOf(e)).map(e=>hrLoad(e)/(e.duration*e.rpe)).sort((a,b)=>a-b);
  CAL={t:Date.now(),n:db.entries.length,m:r.length,k:r.length>=3?Math.min(2,Math.max(.5,r[r.length>>1])):1};return CAL}
-const NOHR=new Set(['kraft','koordination','dehnen','yoga','golf']);
+const NOHR=new Set(['kraft','home','koordination','dehnen','yoga','pilates','golf']);
 const loadOf=e=>{const t=hrLoad(e);return t!=null?t:(e.duration||0)*rpeOf(e)*calib().k};
 const loadEst=e=>trimpOf(e)==null;
 const muscleLoad=e=>(e.duration||0)*rpeOf(e);
@@ -357,16 +377,17 @@ function guessMuscles(name){const n=name.toLowerCase();
  return{m:['brust','ruecken','quads'],s:['schultern','bauch']}}
 function exMuscles(name){const L=libEx(name);const d=L&&L.m?L:guessMuscles(name);const w={};(d.m||[]).forEach(k=>w[k]=(w[k]||0)+1);(d.s||[]).forEach(k=>w[k]=(w[k]||0)+.5);const t=Object.values(w).reduce((a,b)=>a+b,0)||1;for(const k in w)w[k]/=t;return w}
 const EVEN=Object.fromEntries(MK.map(k=>[k,1/12]));
-const SPORT_M={laufen:{quads:.3,hamstrings:.25,waden:.25,gesaess:.2},gravel:{quads:.45,gesaess:.2,hamstrings:.15,waden:.2},spinning:{quads:.45,gesaess:.2,hamstrings:.15,waden:.2},
+const SPORT_M={pilates:{bauch:.35,unterruecken:.2,gesaess:.2,hamstrings:.1,schultern:.15},seil:{waden:.4,quads:.25,schultern:.15,unterarme:.1,gesaess:.1},laufen:{quads:.3,hamstrings:.25,waden:.25,gesaess:.2},gravel:{quads:.45,gesaess:.2,hamstrings:.15,waden:.2},spinning:{quads:.45,gesaess:.2,hamstrings:.15,waden:.2},
  hyrox:{quads:.2,gesaess:.15,hamstrings:.1,waden:.1,schultern:.1,ruecken:.1,brust:.05,bauch:.1,unterarme:.1},padel:{quads:.25,waden:.2,schultern:.2,unterarme:.15,bauch:.1,gesaess:.1},squash:{quads:.25,waden:.2,schultern:.2,unterarme:.15,bauch:.1,gesaess:.1},handball:{quads:.2,waden:.15,gesaess:.1,schultern:.2,ruecken:.15,brust:.1,bauch:.1},
  wandern:{quads:.3,gesaess:.25,waden:.3,hamstrings:.15},schwimmen:{ruecken:.3,schultern:.3,trizeps:.1,brust:.1,bauch:.1,quads:.1},yoga:{bauch:.3,unterruecken:.2,schultern:.2,hamstrings:.3},
  ski:{quads:.5,gesaess:.2,bauch:.15,waden:.15},langlauf:{ruecken:.15,schultern:.15,trizeps:.1,quads:.25,gesaess:.15,waden:.1,bauch:.1},golf:{bauch:.35,schultern:.25,unterarme:.2,unterruecken:.2},koordination:{unterarme:.2,schultern:.2,waden:.2,bauch:.2,quads:.2},dehnen:{hamstrings:.25,unterruecken:.2,schultern:.2,gesaess:.2,waden:.15},sonst:EVEN};
 const SPORT_FF={dehnen:.15,koordination:.3,yoga:.5};
 function entryMuscles(e){const L=muscleLoad(e);const out={};
- if(e.sport==='kraft'&&e.ex&&e.ex.length){let any=false;const rf=Math.min(1.2,Math.max(.6,.75+.05*(rpeOf(e)-5)));
+ if(STR(e.sport)&&e.ex&&e.ex.length){let any=false;const rf=Math.min(1.2,Math.max(.6,.75+.05*(rpeOf(e)-5)));
   for(const x of e.ex){const w=exRaw(x.name);for(const s of(x.sets||[]).filter(isWork)){any=true;const f=s.type==='f'?1.5:s.type==='d'?.7:1;for(const k in w)out[k]=(out[k]||0)+30*rf*f*w[k]}}if(any)return out}
- const m=e.sport==='kraft'?EVEN:(SPORT_M[e.sport]||EVEN);const ff=.6*(e.sport==='yoga'&&YOGA[e.kind]?YOGA[e.kind][1]:(SPORT_FF[e.sport]??1));for(const k in m)out[k]=L*m[k]*ff;return out}
+ const m=STR(e.sport)?EVEN:(SPORT_M[e.sport]||EVEN);const ff=.6*(e.sport==='yoga'&&YOGA[e.kind]?YOGA[e.kind][1]:e.sport==='pilates'?({Matte:.5,Reformer:.6,Power:.75}[e.kind]||.55):(SPORT_FF[e.sport]??1));for(const k in m)out[k]=L*m[k]*ff;return out}
 function exRaw(name){const L=libEx(name);const d=L&&L.m?L:guessMuscles(name);const w={};(d.m||[]).forEach(k=>w[k]=1);(d.s||[]).forEach(k=>{if(!w[k])w[k]=.5});return w}
+const isBW=name=>{const L=libEx(name);return !!(L&&L.bw)};
 const isTimed=name=>{const L=libEx(name);return L&&L.t!==undefined?!!L.t:/\(sek\.?\)/i.test(name)};
 const TAU=36;
 function fatigue(now=Date.now()){const f=Object.fromEntries(MK.map(k=>[k,0]));for(const e of between(now-7*DAY,now+1)){const end=ts(e)+(e.duration||0)*6e4;const h=Math.max(0,(now-end)/HOUR);const g=entryMuscles(e);for(const k in g)f[k]+=g[k]*Math.exp(-h/TAU)}
@@ -393,11 +414,11 @@ function zonesHtml(z){const t=z.reduce((a,b)=>a+b,0)||1;return zonesBar(z,1)+`<d
 const isWork=s=>s.done!==false&&s.type!=='w';
 const STYPES=[['','Satz'],['w','Aufwärmen'],['f','Versagen'],['d','Drop']];
 function setLabel(sets,j){const s=sets[j];if(s.type==='w')return 'Aufw.';const n=sets.slice(0,j+1).filter(t=>t.type!=='w').length;return (s.type==='d'?'Drop ':'Satz ')+n+(s.type==='f'?' 🔥':'')}
-function lastExercise(name,before=Infinity){const list=sorted();for(const e of list){if(e.sport!=='kraft'||!e.ex||ts(e)>=before)continue;const x=e.ex.find(x=>x.name.toLowerCase()===name.toLowerCase());if(x&&x.sets&&x.sets.length)return x.sets}return null}
+function lastExercise(name,before=Infinity){const list=sorted();for(const e of list){if(!STR(e.sport)||!e.ex||ts(e)>=before)continue;const x=e.ex.find(x=>x.name.toLowerCase()===name.toLowerCase());if(x&&x.sets&&x.sets.length)return x.sets}return null}
 function prefillSets(name,cnt,reps,done){const last=lastExercise(name);const warm=last?last.filter(t=>t.type==='w'):[];const work=last?last.filter(t=>t.type!=='w'):[];if(cnt==null)cnt=work.length||3;if(reps==null)reps=8;
  return[...warm.map(t=>({reps:t.reps,weight:t.weight,type:'w',done})),...[...Array(cnt)].map((_,j)=>{const l=work.length?work[Math.min(j,work.length-1)]:null;return{reps:l?(l.reps??reps):reps,weight:l?(l.weight??0):0,done}})]}
-function bestBefore(name,before){let m=0;for(const e of db.entries){if(e.sport!=='kraft'||ts(e)>=before||!e.ex)continue;for(const x of e.ex)if(x.name.toLowerCase()===name.toLowerCase())for(const s of x.sets||[])if(isWork(s)&&s.weight>m)m=s.weight}return m}
-function prsIn(list){let n=0;for(const e of list){if(e.sport==='kraft'&&e.ex)for(const x of e.ex){const b=bestBefore(x.name,ts(e));const mx=Math.max(0,...(x.sets||[]).filter(isWork).map(s=>s.weight||0));if(mx>0&&b>0&&mx>b)n++}
+function bestBefore(name,before){let m=0;for(const e of db.entries){if(!STR(e.sport)||ts(e)>=before||!e.ex)continue;for(const x of e.ex)if(x.name.toLowerCase()===name.toLowerCase())for(const s of x.sets||[])if(isWork(s)&&s.weight>m)m=s.weight}return m}
+function prsIn(list){let n=0;for(const e of list){if(STR(e.sport)&&e.ex)for(const x of e.ex){const b=bestBefore(x.name,ts(e));const mx=Math.max(0,...(x.sets||[]).filter(isWork).map(s=>s.weight||0));if(mx>0&&b>0&&mx>b)n++}
  if(e.sport==='laufen'&&e.distance>=3&&e.duration){const p=e.duration/e.distance;const prev=db.entries.filter(o=>o.sport==='laufen'&&ts(o)<ts(e)&&o.distance>=e.distance*0.9&&o.duration);if(prev.length&&p<Math.min(...prev.map(o=>o.duration/o.distance)))n++}}
  return n}
 const tonnage=e=>(e.ex||[]).reduce((s,x)=>s+(x.sets||[]).filter(isWork).reduce((a,t)=>a+(t.reps||0)*(t.weight||0),0),0);
@@ -406,36 +427,42 @@ function journeyKm(e){const s=db.settings;if(e.distance){if(['laufen','wandern']
 
 /* ---------- Erfolge ---------- */
 const POOL={
- kraft:['Hammerschlag in Erebor','Die Esse glüht','Kraft der Zwerge','Steine für Helms Klamm','Am Amboss von Erebor'],
- hyrox:['Ansturm der Rohirrim','Acht Feuer, acht Prüfungen','Die Hornburg hält','Durch die Pfade der Toten'],
- laufen:['Leichtfüßig wie ein Elb','Auf Waldläuferpfaden','Flink wie Legolas','Unterwegs nach Bree','Die Straße gleitet fort'],
- gravel:['Ritt nach Edoras','Über die Weiten Rohans','Schattenfell galoppiert','Staub auf der Oststraße'],
- spinning:['Die Mühle von Hobbingen','Räder von Isengart','Tretwerk der Zwerge'],
- schwimmen:['Wie ein Fisch im Brandywein','Durch den Anduin','Die Furt durchschwommen'],
- wandern:['Hin und wieder zurück','Auf dem Weg nach Bruchtal','Pfade im Auenland','Über die Hügel von Bree'],
- handball:['Schildwall von Helms Klamm','Der Wurf des Bard','Angriff der Rohirrim'],
- padel:['Gefährten am Netz','Zu zweit wie Merry und Pippin','Spiel im Grünen Drachen'],
- squash:['Duell in den Hallen von Meduseld','Wände wie in Moria','Schnell wie ein Bote Gondors'],
- golf:['Ein Abschlag im Auenland','Auf dem Grün von Hobbingen','Ein Spaziergang mit Schläger'],
- yoga:['Ruhe von Lothlórien','Atem der Ents','Stille in Bruchtal','Gelassenheit der Elben'],
- ski:['Abfahrt vom Caradhras','Schneegipfel der Nebelberge','Wie ein Adler zu Tal'],
- langlauf:['Spur der Dúnedain im Schnee','Durch die Eisbucht von Forochel','Winterwanderung nach Bruchtal'],
- koordination:['Geschick der Elben','Gaukler aus Bree','Flinke Finger wie Bilbo'],
- dehnen:['Biegsam wie eine Weidenrute','Geschmeidig wie ein Elb','Ruhe am Brandywein'],
+ kraft:['Hammerschlag in Erebor','Die Esse glüht','Kraft der Zwerge','Steine für Helms Klamm','Am Amboss von Erebor','Gimlis Axt','Die Tore von Moria','Schmiedefeuer im Erebor','Thorins Entschlossenheit','Stärke der Beorninger'],
+ home:['Kammerwerk in Beutelsend','Training im Hobbitloch','Die Stube wird zur Esse','Zwischen Sessel und Kamin','Heimliche Kraft der Hobbits','Ein Hobbit trainiert daheim','Unter dem Dach von Beutelsend','Fleiß hinter runden Türen'],
+ hyrox:['Ansturm der Rohirrim','Acht Feuer, acht Prüfungen','Die Hornburg hält','Durch die Pfade der Toten','Die Leuchtfeuer brennen','Sturm auf das Schwarze Tor','Schildmaid von Rohan','Kampf am Klammwall'],
+ laufen:['Leichtfüßig wie ein Elb','Auf Waldläuferpfaden','Flink wie Legolas','Unterwegs nach Bree','Die Straße gleitet fort','Spuren im Tau','Läufer von Rohan','Über die Hügel des Auenlands','Jagd durch Fangorn','Botengang nach Minas Tirith'],
+ gravel:['Ritt nach Edoras','Über die Weiten Rohans','Schattenfell galoppiert','Staub auf der Oststraße','Durch die Pforte von Rohan','Mit dem Wind über die Ebene','Reiter der Mark','Auf alten Zwergenpfaden'],
+ spinning:['Die Mühle von Hobbingen','Räder von Isengart','Tretwerk der Zwerge','Sarumans Maschinen','Die Werkstatt von Isengart','Wasserrad am Brandywein'],
+ schwimmen:['Wie ein Fisch im Brandywein','Durch den Anduin','Die Furt durchschwommen','Im Spiegelsee','Mit den Booten aus Lórien','Wasserwege nach Esgaroth','Unter den Fällen von Rauros'],
+ wandern:['Hin und wieder zurück','Auf dem Weg nach Bruchtal','Pfade im Auenland','Über die Hügel von Bree','Durch das Grüne Tal','Am Fuß der Nebelberge','Wanderung zum Wetterberg','Unterwegs mit Bilbo'],
+ handball:['Schildwall von Helms Klamm','Der Wurf des Bard','Angriff der Rohirrim','Die Gemeinschaft im Angriff','Wurf wie ein Speer aus Dol Amroth','Verteidigung der Hornburg','Mannschaft aus Gondor'],
+ padel:['Gefährten am Netz','Zu zweit wie Merry und Pippin','Spiel im Grünen Drachen','Doppel aus dem Auenland','Netzspiel in Bree','Zwei Freunde, ein Ziel'],
+ squash:['Duell in den Hallen von Meduseld','Wände wie in Moria','Schnell wie ein Bote Gondors','Echo in den Zwergenhallen','Duell im Tänzelnden Pony','Flinker als Gollum'],
+ golf:['Ein Abschlag im Auenland','Auf dem Grün von Hobbingen','Ein Spaziergang mit Schläger','Bullroarers Schwung','Rasen von Michelbinge','Abschlag am Weißdorn'],
+ yoga:['Ruhe von Lothlórien','Atem der Ents','Stille in Bruchtal','Gelassenheit der Elben','Unter den Mallornbäumen','Galadriels Spiegel','Rast an Nimrodel','Frieden im Haus Elronds'],
+ pilates:['Mitte wie ein Elbenbogen','Kern der Zwerge','Haltung der Waldelben','Kraft aus der Mitte','Gespannt wie Bards Bogensehne','Gleichgewicht von Lórien'],
+ seil:['Hüpfen wie ein Hobbit am Fest','Tanz im Grünen Drachen','Springen über den Brandywein','Seilspiel in Hobbingen','Flinke Füße wie Pippin','Sprünge zu Bilbos Geburtstag'],
+ ski:['Abfahrt vom Caradhras','Schneegipfel der Nebelberge','Wie ein Adler zu Tal','Durch den Schnee von Forochel','Talfahrt nach Bruchtal'],
+ langlauf:['Spur der Dúnedain im Schnee','Durch die Eisbucht von Forochel','Winterwanderung nach Bruchtal','Spuren im Winterwald','Über die weißen Weiten'],
+ koordination:['Geschick der Elben','Gaukler aus Bree','Flinke Finger wie Bilbo','Leichtfüßig über die Brücke von Khazad-dûm','Tanz auf dem Seil'],
+ dehnen:['Biegsam wie eine Weidenrute','Geschmeidig wie ein Elb','Ruhe am Brandywein','Biegsam wie der Alte Weidenmann','Strecken unter Mallornbäumen'],
  sonst:['Ein Abenteuer im Auenland','Eine unerwartete Reise','Taten eines Hobbits']};
+const GEN=['Ein Schritt aus der Tür','Mut eines Hobbits','Licht von Eärendil','Sterne über Bruchtal','Die Weisen sind zufrieden','Ein Lied der Zwerge','Weisheit Gandalfs','Ein Tag im Auenland','Hoffnung der Menschen','Die Adler kommen','Treue der Gefährten','Ein Feuer im Kamin von Beutelsend','Tee mit Bilbo','Pilze vom Bauer Maggot','Rast im Tänzelnden Pony','Ein Brief aus Bruchtal','Die Sonne über Hobbingen','Lembas für den Weg','Ein Funke Hoffnung','Der Weiße Baum blüht','Eine Feder vom Adler','Der Ring bleibt verborgen','Elbenlicht in der Dunkelheit','Auf Gandalfs Spuren','Bilbos Abschiedsfest','Ein Becher im Grünen Drachen','Sams Gartenarbeit','Die Gemeinschaft hält','Ein neuer Morgen in Minas Tirith','Das Horn von Gondor','Tom Bombadils Lied','Die Lichter von Esgaroth','Der Pfad nach Isengard','Ein Blick vom Amon Hen','Die Glocken von Minas Tirith','Rat am Ufer des Anduin','Die Laternen von Bree','Frodos Tagebuch','Ein Stern über dem Schicksalsberg','Mithril unter dem Hemd','Ein Lied für den Weg'];
+function shuf(arr,seed){const a=[...arr];let h=hash(seed)||1;for(let i=a.length-1;i>0;i--){h=(Math.imul(h,1103515245)+12345)>>>0;const j=h%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
 const TIERS={
- kraft:[[e=>prsIn([e])>0,'Neu geschmiedete Klinge','Neue Bestleistung im Krafttraining'],[e=>tonnage(e)>=10000,'Ein Berg aus Eisen','Über 10 Tonnen bewegt']],
- laufen:[[e=>prsIn([e])>0,'Schneller als die Schwarzen Reiter','Neue Pace-Bestleistung'],[e=>e.distance>=21,'Drei Jäger auf der Spur','Halbmarathon-Distanz geschafft'],[e=>e.kind==='Intervall'||(e.intervals&&e.intervals.length>2),'Flucht vor den Nazgûl','Intervalltraining gemeistert']],
+ kraft:[[e=>tonnage(e)>=10000,'Ein Berg aus Eisen','Über 10 Tonnen bewegt']],
+ laufen:[[e=>e.distance>=21,'Drei Jäger auf der Spur','Halbmarathon-Distanz geschafft'],[e=>e.kind==='Intervall'||(e.intervals&&e.intervals.length>2),'Flucht vor den Nazgûl','Intervalltraining gemeistert']],
  gravel:[[e=>e.distance>=80,'Großer Ritt nach Gondor','80 km oder mehr'],[e=>e.ascent>=800,'Über das Nebelgebirge','800 Höhenmeter oder mehr']],
  padel:[[e=>e.won==='sieg','Sieg auf dem Pelennor','Match gewonnen']],
  squash:[[e=>e.won==='sieg','Sieg auf dem Pelennor','Match gewonnen']],
+ handball:[[e=>e.won==='sieg','Sieg auf dem Pelennor','Spiel gewonnen']],
  schwimmen:[[e=>e.distance>=2,'Bis nach Tol Brandir','2 km oder mehr geschwommen']],
  wandern:[[e=>e.distance>=20||e.ascent>=800,'Über den Caradhras','Große Tour']],
  golf:[[e=>e.kind==='18 Loch','Bullroarers Erbe','18 Loch gespielt']],
  koordination:[[e=>e.catches>=100,'Gandalfs Feuerwerk','100 Fänge am Stück']]};
 function dailyAch(e){if(isRace(e))return{n:e.sport==='hyrox'?'Schlacht auf den Pelennor-Feldern':'In die Schlacht gezogen',d:'Wettkampf'+(e.race.name?': '+e.race.name:'')+(e.race.place?' · Platz '+e.race.place:''),gold:1};for(const[t,n,d]of(TIERS[e.sport]||[]))try{if(t(e))return{n,d,gold:1}}catch(x){}
  if(e.duration>=120)return{n:'Ein langer, langer Weg',d:'Zwei Stunden oder mehr',gold:1};
- const p=POOL[e.sport]||POOL.sonst;return{n:p[hash(e.id)%p.length],d:sp(e.sport).n+' · '+fmtDur(e.duration)}}
+ const p=POOL[e.sport]||POOL.sonst;return{n:idx().dn.get(e.id)||p[hash(e.id)%p.length],d:sp(e.sport).n+' · '+fmtDur(e.duration)}}
 const days=l=>new Set(l.map(e=>dkey(e.start))).size;
 const mins=l=>l.reduce((s,e)=>s+(e.duration||0),0);
 const nsport=l=>new Set(l.map(e=>e.sport)).size;
@@ -458,7 +485,17 @@ function idx(){if(IDX&&IDX.v===VER)return IDX;const byW=new Map(),byM=new Map();
  const wAch=new Map(),mAch=new Map(),now=Date.now();
  for(const[k,l]of byW){const end=Math.min(now,new Date(k).getTime()+7*DAY-1);wAch.set(k,WCONDS.filter(c=>c.t(l,end)).map(c=>({id:c.id,n:cname(c,k),d:c.d})))}
  for(const[k,l]of byM)mAch.set(k,MCONDS.filter(c=>c.t(l)).map(c=>({id:c.id,n:cname(c,k),d:c.d})));
- IDX={v:VER,byW,byM,wAch,mAch};return IDX}
+ const dn=new Map();for(const[m,l]of byM){const used=new Set();const gen=shuf(GEN,'g'+m);l.slice().sort((a,b)=>ts(a)-ts(b)).forEach(e=>{const sp=shuf(POOL[e.sport]||POOL.sonst,e.sport+m);const n=sp.find(x=>!used.has(x))||gen.find(x=>!used.has(x))||sp[0];used.add(n);dn.set(e.id,n)})}
+ const prs=new Map();for(const e of db.entries){const l=prList(e);if(l.length)prs.set(e.id,l)}
+ IDX={v:VER,byW,byM,wAch,mAch,dn,prs};return IDX}
+function bestRepsBefore(name,before,tm){let m=0;const n=name.toLowerCase();for(const e of db.entries){if(!STR(e.sport)||ts(e)>=before||!e.ex)continue;for(const x of e.ex)if(x.name.toLowerCase()===n)for(const s of x.sets||[])if(isWork(s)&&(tm||!s.weight)&&(s.reps||0)>m)m=s.reps}return m}
+function prList(e){const out=[];if(STR(e.sport)&&e.ex)for(const x of e.ex){const w=(x.sets||[]).filter(isWork);if(!w.length)continue;const tm=isTimed(x.name);const mxW=Math.max(0,...w.map(s=>s.weight||0));
+  if(mxW>0&&!tm){const b=bestBefore(x.name,ts(e));if(b>0&&mxW>b)out.push({k:'w',n:'Neues Gewicht',d:x.name+': '+mxW.toLocaleString('de-DE')+' kg (vorher '+b.toLocaleString('de-DE')+' kg)'})}
+  else{const mr=Math.max(0,...w.filter(s=>tm||!s.weight).map(s=>s.reps||0));const b=bestRepsBefore(x.name,ts(e),tm);if(b>0&&mr>b)out.push({k:tm?'t':'r',n:tm?'Neue Bestzeit':'Neuer Wiederholungsrekord',d:x.name+': '+mr+(tm?' s':' Wdh.')+' (vorher '+b+')'})}}
+ const minD={laufen:3,schwimmen:.4,gravel:10}[e.sport];
+ if(minD&&e.distance>=minD&&e.duration){const p=e.duration/e.distance;const prev=db.entries.filter(o=>o.sport===e.sport&&ts(o)<ts(e)&&o.distance>=e.distance*.9&&o.duration);
+  if(prev.length&&p<Math.min(...prev.map(o=>o.duration/o.distance)))out.push({k:'p',n:'Neue Bestzeit',d:sp(e.sport).n+' '+fmtKm(e.distance)+' km · '+(e.sport==='gravel'?(e.distance/(e.duration/60)).toLocaleString('de-DE',{maximumFractionDigits:1})+' km/h':e.sport==='schwimmen'?fmtPace(p/10)+' /100 m':fmtPace(p)+' /km')})}
+ return out}
 function yearGoals(y){const a=new Date(y,0,1).getTime(),b=new Date(y+1,0,1).getTime();const l=between(a,b);const P=(v,t,txt)=>({p:Math.min(1,v/t),txt});
  const now=Date.now();const weeksSoFar=Math.max(1,Math.ceil((Math.min(now,b)-weekStart(a).getTime())/(7*DAY)));
  const wk=new Set(l.map(e=>wkey(e.start))).size;const km=l.reduce((s,e)=>s+(e.distance||0),0),sets=l.reduce((s,e)=>s+setsDone(e),0);
@@ -473,12 +510,28 @@ const LIFE=[
  {k:'n',lv:[[1,'Der erste Schritt vor die Tür'],[10,'Hobbit auf Wanderschaft'],[50,'Waldläufer'],[100,'Hüter des Nordens'],[250,'Hauptmann von Gondor'],[500,'Herr der Mark'],[1000,'Einer der Istari']],u:'Einheiten'},
  {k:'h',lv:[[10,'Zehn Wegstunden'],[100,'Hundert Wegstunden'],[500,'Fünfhundert Wegstunden'],[1000,'Ein Zeitalter des Trainings']],u:'Stunden'},
  {k:'t',lv:[[10000,'Steinträger'],[100000,'Baumeister von Erebor'],[1000000,'König unter dem Berge']],u:'kg bewegt'},
- {k:'s',lv:[[4,'Beständig wie der Brandywein'],[12,'Treu wie Sam'],[26,'Ausdauer der Ents'],[52,'Ein Jahr ohne Rast']],u:'Wochen am Stück aktiv'}];
+ {k:'s',lv:[[4,'Beständig wie der Brandywein'],[12,'Treu wie Sam'],[26,'Ausdauer der Ents'],[52,'Ein Jahr ohne Rast']],u:'Wochen am Stück aktiv'},
+ {k:'mo',lv:[[3,'Ein Vierteljahr dabei'],[6,'Ein halbes Jahr unterwegs'],[12,'Ein ganzes Jahr ohne Pause'],[24,'Zwei Zeitalter']],u:'Monate am Stück aktiv'},
+ {k:'d',lv:[[100,'Hundert Wegmeilen'],[500,'Fünfhundert Wegmeilen'],[1000,'Tausend Wegmeilen'],[2500,'Über alle Berge'],[5000,'Einmal rund um Mittelerde']],u:'km Strecke'},
+ {k:'sp',lv:[[3,'Vielseitig wie ein Hobbit'],[5,'Gefährte aller Völker'],[8,'Kenner Mittelerdes'],[12,'Meister aller Künste']],u:'Sportarten ausprobiert'},
+ {k:'pr',lv:[[1,'Die erste Bestleistung'],[10,'Zehn neue Klingen'],[25,'Rekordjäger von Rohan'],[50,'Legende der Mark'],[100,'Unübertroffen wie Fëanor']],u:'Bestleistungen'},
+ {k:'st',lv:[[100,'Hundert Hammerschläge'],[1000,'Tausend Hammerschläge'],[5000,'Schmied von Erebor'],[10000,'Meister der Esse']],u:'Kraftsätze'},
+ {k:'lg',lv:[[90,'Ausdauer eines Zwergs'],[180,'Marsch der Uruk-hai'],[300,'Fünf Stunden ohne Rast'],[480,'Ritt der Rohirrim']],u:'Minuten in einer Einheit'},
+ {k:'ea',lv:[[1,'Vor dem ersten Hahnenschrei'],[10,'Frühaufsteher wie Sam'],[50,'Morgenstern'],[100,'Hüter der Morgenröte']],u:'Einheiten vor 7 Uhr'},
+ {k:'nt',lv:[[1,'Unter Sternen'],[10,'Nachtwanderer'],[50,'Waldläufer der Nacht'],[100,'Kind des Mondes']],u:'Einheiten ab 21 Uhr'},
+ {k:'rc',lv:[[1,'Die erste Schlacht'],[5,'Veteran der Kriege'],[10,'Heerführer'],[25,'Unbezwingbarer Recke']],u:'Wettkämpfe'},
+ {k:'wn',lv:[[1,'Der erste Sieg'],[10,'Sieger von der Hornburg'],[25,'Champion der Mark'],[50,'Unbezwungen']],u:'Siege'},
+ {k:'mc',lv:[[7,'Eine Woche achtsam'],[30,'Achtsam wie Elrond'],[100,'Hüter der Selbstkenntnis'],[365,'Ein Jahr in sich hineingehört']],u:'Morgen-Checks'}];
 function lifeStats(){const n=db.entries.length,h=db.entries.reduce((s,e)=>s+(e.duration||0),0)/60,t=db.entries.reduce((s,e)=>s+tonnage(e),0);
  const weeks=idx().byW;let best=0,run=0;if(weeks.size){const first=Math.min(...db.entries.map(ts));let d=weekStart(first);const end=weekStart(new Date());while(d<=end){if(weeks.has(dkey(d))){run++;best=Math.max(best,run)}else if(dkey(d)!==dkey(end))run=0;d=addDays(d,7)}}
- const km=db.entries.reduce((s,e)=>s+journeyKm(e),0);return{n,h,t,s:best,km}}
+ const km=db.entries.reduce((s,e)=>s+journeyKm(e),0);const E=db.entries;const hr=e=>new Date(e.start).getHours();
+ const ms=[...idx().byM.keys()].sort();let mo=0,mr=0,prev=null;for(const k of ms){const d=new Date(k);const c=prev&&(d.getFullYear()*12+d.getMonth())-(prev.getFullYear()*12+prev.getMonth())===1;mr=c?mr+1:1;mo=Math.max(mo,mr);prev=d}
+ let pr=0;idx().prs.forEach(l=>pr+=l.length);
+ return{n,h,t,s:best,km,mo,d:E.reduce((s,e)=>s+(e.distance||0),0),sp:new Set(E.map(e=>e.sport)).size,pr,st:E.reduce((s,e)=>s+setsDone(e),0),lg:Math.max(0,...E.map(e=>e.duration||0)),
+  ea:E.filter(e=>hr(e)<7&&hr(e)>=3).length,nt:E.filter(e=>hr(e)>=21).length,rc:E.filter(isRace).length,wn:E.filter(e=>e.won==='sieg').length,mc:Object.values(db.checks||{}).filter(c=>c&&!c.skip).length}}
 function earnedSet(){const S=new Map();const now=new Date();const I=idx();
  for(const e of between(Date.now()-2*DAY,Date.now()+DAY))if(e.confirmed!==false){const a=dailyAch(e);S.set('d'+e.id,(a.gold?'🌟 ':'🏆 ')+a.n+' – '+a.d)}
+ for(const e of between(Date.now()-2*DAY,Date.now()+DAY))(I.prs.get(e.id)||[]).forEach((p,i)=>S.set('p'+e.id+i,'⚡ '+p.n+' – '+p.d));
  (I.wAch.get(wkey(now))||[]).forEach(a=>S.set('w'+a.id+wkey(now),'🏆 Wochenerfolg: '+a.n+' – '+a.d));
  (I.mAch.get(mkey(now))||[]).forEach(a=>S.set('m'+a.id+mkey(now),'🏆 Monatserfolg: '+a.n+' – '+a.d));
  const L=lifeStats();for(const g of LIFE)for(const[v,n]of g.lv)if(L[g.k]>=v)S.set('l'+n,'🏆 Lebenserfolg: '+n);
@@ -724,13 +777,13 @@ function chipsField(label,key,opts,cur){return `<div class="f"><label>${label}</
 const exDatalist=()=>`<datalist id="exl">${allExNames().map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`;
 function sportDetails(e){const s=e.sport;let h='';
  if(KINDS[s]&&s!=='yoga')h+=chipsField('Art','kind',KINDS[s],e.kind);
- if(s==='kraft')h+=`<div class="f"><label>Name / Vorlage</label><input data-k="title" value="${esc(e.title||'')}" placeholder="Push-Tag"></div><div id="exed">${exEditor()}</div>${exDatalist()}
+ if(STR(s))h+=`<div class="f"><label>Name / Vorlage</label><input data-k="title" value="${esc(e.title||'')}" placeholder="Push-Tag"></div><div id="exed">${exEditor()}</div>${exDatalist()}
   <div id="tplsave" style="margin-top:10px"><button class="sm" onclick="tplFromDraft()">💾 Als Vorlage speichern</button></div>`;
  if(s==='laufen'||s==='wandern')h+=gearOpts('schuh',e.gearId);
  if(s==='gravel')h+=chipsField('Untergrund','surface',['Asphalt','Schotter','Trail','Gemischt'],e.surface)+gearOpts('rad',e.gearId);
  if(s==='koordination')h+=`<div class="f"><label>🤹 Fänge am Stück (bester Versuch)</label><input data-k="catches" value="${e.catches??''}" inputmode="numeric"></div>`;
  if(s==='golf')h+=`<div class="f"><label>Schläge</label><input data-k="score" value="${esc(e.score||'')}" inputmode="numeric"></div>`;
- if(s==='padel'||s==='squash')h+=(s==='padel'?`<div class="f"><label>Partner</label><input data-k="partner" value="${esc(e.partner||'')}" list="pl"></div>`:'')+`<div class="f"><label>Gegner</label><input data-k="opponent" value="${esc(e.opponent||'')}" list="ol"></div><div class="f"><label>Ergebnis</label><input data-k="result" value="${esc(e.result||'')}" placeholder="6:4 3:6 7:5"></div><div class="f"><label>Ausgang</label><div class="chips">${[['sieg','Sieg'],['niederlage','Niederlage'],['remis','Unentschieden']].map(([k,n])=>`<span class="chip ${e.won===k?'on':''}" onclick="setD('won','${k}',this)">${n}</span>`).join('')}</div></div>
+ if(s==='padel'||s==='squash'||s==='handball')h+=(s==='padel'?`<div class="f"><label>Partner</label><input data-k="partner" value="${esc(e.partner||'')}" list="pl"></div>`:'')+`<div class="f"><label>Gegner</label><input data-k="opponent" value="${esc(e.opponent||'')}" list="ol"></div><div class="f"><label>Ergebnis</label><input data-k="result" value="${esc(e.result||'')}" placeholder="6:4 3:6 7:5"></div><div class="f"><label>Ausgang</label><div class="chips">${[['sieg','Sieg'],['niederlage','Niederlage'],['remis','Unentschieden']].map(([k,n])=>`<span class="chip ${e.won===k?'on':''}" onclick="setD('won','${k}',this)">${n}</span>`).join('')}</div></div>
  <datalist id="pl">${[...new Set(db.entries.map(x=>x.partner).filter(Boolean))].map(x=>`<option value="${esc(x)}">`).join('')}</datalist><datalist id="ol">${[...new Set(db.entries.map(x=>x.opponent).filter(Boolean))].map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`;
  if(s==='hyrox'){e.hx=e.hx||{runs:[],st:[]};h+=`<div class="f"><label>Zeiten (mm:ss) – leer lassen, was du nicht gemacht hast</label>${HYROX_ST.map((n,i)=>`<div class="hx" style="margin:4px 0"><span>Lauf ${i+1}</span><input data-hx="runs.${i}" value="${e.hx.runs[i]!=null?fmtSec(e.hx.runs[i]):''}" inputmode="numeric" placeholder="4:30"><span>${n}</span><input data-hx="st.${i}" value="${e.hx.st[i]!=null?fmtSec(e.hx.st[i]):''}" inputmode="numeric" placeholder="4:00"></div>`).join('')}
  <div class="hx" style="margin:4px 0"><span>Roxzone</span><input data-hx="rox" value="${e.hx.rox!=null?fmtSec(e.hx.rox):''}" placeholder="6:00"><span>Gesamt</span><input data-k="hyroxTotalStr" value="${e.hyroxTotal?fmtSec(e.hyroxTotal):''}" placeholder="auto"></div></div>`}
@@ -752,7 +805,7 @@ function tplFromDraft(){syncEx();const ex=(draft.ex||[]).filter(x=>x.name&&x.nam
  $('#tplsave').innerHTML=`<div class="row"><input id="tpn" value="${esc((ti&&ti.value)||draft.title||'')}" placeholder="Name der Vorlage"><button class="sm pri" onclick="tplSaveDraft()">Speichern</button></div>`;$('#tpn').focus()}
 function tplSaveDraft(){syncEx();const name=$('#tpn').value.trim();if(!name)return toast('Namen angeben');
  const ex=draft.ex.filter(x=>x.name&&x.name.trim()).map((x,i,arr)=>{const w=(x.sets||[]).filter(s=>s.type!=='w');const r=[x.name.trim(),w.length||3,(w[0]&&w[0].reps)||10];if(x.ss&&i>0&&arr[i-1].ss===x.ss)r.push(true);return r});
- const old=db.templates.find(t=>t.sport==='kraft'&&t.name.toLowerCase()===name.toLowerCase());if(old)old.ex=ex;else db.templates.push({id:uid(),sport:'kraft',name,ex});
+ const old=db.templates.find(t=>STR(t.sport)&&t.name.toLowerCase()===name.toLowerCase());if(old)old.ex=ex;else db.templates.push({id:uid(),sport:'kraft',name,ex});
  ex.forEach(([n])=>ensureEx(n));save();$('#tplsave').innerHTML=`<p class="muted" style="margin:0">✓ Vorlage „${esc(name)}“ ${old?'aktualisiert':'gespeichert'}</p>`}
 function renderEdit(quick){const e=draft;const S=sp(e.sport);
  const showDetails=!quick&&!e._new&&(e.notes||e.distance||Object.keys(e.pains||{}).length);
@@ -766,7 +819,7 @@ function renderEdit(quick){const e=draft;const S=sp(e.sport);
  <div class="f"><label>Wie anstrengend? (1–10)</label><div class="rpe">${[...Array(10)].map((_,i)=>`<span class="chip ${e.rpe===i+1?'on':''}" onclick="setD('rpe',${i+1},this)">${i+1}</span>`).join('')}</div>${!e.rpe&&e.hrAvg?`<p class="muted" style="margin:4px 0 0">Ohne Angabe geschätzt aus dem Puls: ${rpeOf(e)}</p>`:''}</div>
  <div class="f"><label>Wie hast du dich gefühlt?</label><div class="mood">${MOODS.map((m,i)=>`<span class="chip ${e.mood===i+1?'on':''}" onclick="setD('mood',${i+1},this)">${m}</span>`).join('')}</div></div>
  ${raceEditor(e,quick)}
- <details ${showDetails||(e.sport==='kraft'&&e.ex&&e.ex.length)||(e.intervals&&e.intervals.length)?'open':''}><summary>Details: ${detailHint(e.sport)}</summary>
+ <details ${showDetails||(STR(e.sport)&&e.ex&&e.ex.length)||(e.intervals&&e.intervals.length)?'open':''}><summary>Details: ${detailHint(e.sport)}</summary>
  ${sportDetails(e)}
  <div class="grid2"><div class="f"><label>Strecke (km)</label><input data-k="distance" value="${e.distance??''}" inputmode="decimal"></div><div class="f"><label>Höhenmeter</label><input data-k="ascent" value="${e.ascent??''}" inputmode="numeric"></div>
  <div class="f"><label>Ø Puls</label><input data-k="hrAvg" value="${e.hrAvg??''}" inputmode="numeric"></div><div class="f"><label>kcal</label><input data-k="kcal" value="${e.kcal??''}" inputmode="numeric"></div></div>
@@ -805,21 +858,21 @@ function delEntry(id){const i=db.entries.findIndex(x=>x.id===id);if(i<0)return;c
 /* ---------- Übungen & Vorlagen ---------- */
 function allExNames(){const s=new Set(db.exercises.map(x=>x.n));db.templates.forEach(t=>(t.ex||[]).forEach(x=>s.add(x[0])));db.entries.forEach(e=>(e.ex||[]).forEach(x=>s.add(x.name)));return[...s].sort((a,b)=>a.localeCompare(b,'de'))}
 function ensureEx(n,ms){n=n.trim();if(!n||libEx(n))return;const g=ms&&ms.m&&ms.m.length?ms:guessMuscles(n);db.exercises.push({n,m:[...g.m],s:[...(g.s||[])]})}
-const kraftTpls=()=>db.templates.filter(t=>t.sport==='kraft');
-const ausdTpls=()=>db.templates.filter(t=>t.sport!=='kraft');
+const kraftTpls=()=>db.templates.filter(t=>STR(t.sport));
+const ausdTpls=()=>db.templates.filter(t=>!STR(t.sport));
 function stepTxt(p){return p&&p.v?(p.m==='d'?fmtM(p.v):fmtSec(p.v)):''}
-function tplSummary(t){if(t.sport==='kraft')return t.ex.length+' Übungen';if(t.steps){const ex=expandSteps(t);return ex.filter(s=>s.k==='work').length+' Übungen · '+fmtDur(ex.reduce((a,s)=>a+s.v,0)/60)}const a=[];if(t.warm&&t.warm.v)a.push(stepTxt(t.warm)+' ein');a.push((t.n>1?t.n+' × ':'')+stepTxt(t.work)+(t.rest&&t.rest.v&&t.n>1?' / '+stepTxt(t.rest)+' Pause':''));if(t.cool&&t.cool.v)a.push(stepTxt(t.cool)+' aus');return a.join(' · ')}
+function tplSummary(t){if(STR(t.sport))return t.ex.length+' Übungen';if(t.steps){const ex=expandSteps(t);return ex.filter(s=>s.k==='work').length+' Übungen · '+fmtDur(ex.reduce((a,s)=>a+s.v,0)/60)}const a=[];if(t.warm&&t.warm.v)a.push(stepTxt(t.warm)+' ein');a.push((t.n>1?t.n+' × ':'')+stepTxt(t.work)+(t.rest&&t.rest.v&&t.n>1?' / '+stepTxt(t.rest)+' Pause':''));if(t.cool&&t.cool.v)a.push(stepTxt(t.cool)+' aus');return a.join(' · ')}
 let tdraft=null;
 function editTpl(id,sport){const t=id?db.templates.find(x=>x.id===id):null;
- tdraft=t?JSON.parse(JSON.stringify(t)):sport==='routine'?{id:uid(),sport:'dehnen',name:'',steps:[{lbl:'',v:30}]}:(sport==='kraft'?{id:uid(),sport:'kraft',name:'',ex:[['',3,10]]}:{id:uid(),sport:'laufen',name:'',warm:{m:'t',v:600},n:5,work:{m:'t',v:180},rest:{m:'t',v:120},cool:{m:'t',v:600}});tdraft._new=!t;renderTpl()}
+ tdraft=t?JSON.parse(JSON.stringify(t)):sport==='routine'?{id:uid(),sport:'dehnen',name:'',steps:[{lbl:'',v:30}]}:(STR(sport)?{id:uid(),sport,name:'',ex:[['',3,10]]}:{id:uid(),sport:'laufen',name:'',warm:{m:'t',v:600},n:5,work:{m:'t',v:180},rest:{m:'t',v:120},cool:{m:'t',v:600}});tdraft._new=!t;renderTpl()}
 function renderTpl(){const t=tdraft;let h=`<div class="row sb"><h2>${t._new?'Neue Vorlage':'Vorlage bearbeiten'}</h2><button class="ghost" onclick="closeSheet()">✕</button></div>
- <div class="f"><label>Name</label><input id="tn" value="${esc(t.name)}" placeholder="${t.sport==='kraft'?'z. B. Push-Tag':'z. B. Intervalle 6 × 3 min'}"></div>`;
- if(t.sport==='kraft'){h+=`<div id="tex">${tplExRows()}</div><button class="sm" onclick="tSync();tdraft.ex.push(['',3,10]);$('#tex').innerHTML=tplExRows()">＋ Übung</button>${exDatalist()}<p class="muted" style="margin:8px 0 0">⇄ = Supersatz mit der Übung darüber.</p>`}
- else if(t.steps){const sps=Object.entries(allSports()).filter(([k])=>k!=='kraft'&&k!=='hyrox');
+ <div class="f"><label>Name</label><input id="tn" value="${esc(t.name)}" placeholder="${STR(t.sport)?'z. B. Push-Tag':'z. B. Intervalle 6 × 3 min'}"></div>`;
+ if(STR(t.sport)){h+=`<div id="tex">${tplExRows()}</div><button class="sm" onclick="tSync();tdraft.ex.push(['',3,10]);$('#tex').innerHTML=tplExRows()">＋ Übung</button>${exDatalist()}<p class="muted" style="margin:8px 0 0">⇄ = Supersatz mit der Übung darüber.</p>`}
+ else if(t.steps){const sps=Object.entries(allSports()).filter(([k])=>!STR(k)&&k!=='hyrox');
   h+=`<div class="f"><label>Sportart</label><select id="tsp">${sps.map(([k,s])=>`<option value="${k}" ${t.sport===k?'selected':''}>${s.i} ${esc(s.n)}</option>`).join('')}</select></div><div id="trs">${routRows()}</div>
   <div class="row"><button class="sm" onclick="tSync();tdraft.steps.push({lbl:'',v:30});$('#trs').innerHTML=routRows()">＋ Übung</button><button class="sm" onclick="tSync();tdraft.steps.push({lbl:'Pause',v:20,p:1});$('#trs').innerHTML=routRows()">＋ Pause</button></div>
   <p class="muted" style="margin:8px 0 0">Zeit als Sekunden oder mm:ss. „beidseitig“ macht daraus automatisch links und rechts.</p>`}
- else{const sps=Object.entries(allSports()).filter(([k])=>k!=='kraft'&&k!=='hyrox');
+ else{const sps=Object.entries(allSports()).filter(([k])=>!STR(k)&&k!=='hyrox');
   h+=`<div class="f"><label>Sportart</label><select id="tsp">${sps.map(([k,s])=>`<option value="${k}" ${t.sport===k?'selected':''}>${s.i} ${esc(s.n)}</option>`).join('')}</select></div>
   ${stepEd('warm','Aufwärmen',t.warm)}<div class="f"><label>Wiederholungen</label><input id="tnn" value="${t.n||1}" inputmode="numeric"></div>${stepEd('work','Intervall / Hauptteil',t.work)}${stepEd('rest','Pause zwischen Intervallen',t.rest)}${stepEd('cool','Ausklang',t.cool)}
   <p class="muted">Leer lassen, was es nicht gibt. Zeit als mm:ss, Strecke in Metern. Bei Strecke tippst du im Training selbst, wenn du sie geschafft hast.</p>`}
@@ -832,11 +885,11 @@ function routRows(){return tdraft.steps.map((x,i)=>`<div style="border-top:1px s
 function rMove(i,d){tSync();const a=tdraft.steps;const j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];$('#trs').innerHTML=routRows()}
 function tSync(){const t=tdraft;const n=$('#tn');if(n)t.name=n.value;
  if(t.steps){const s=$('#tsp');if(s)t.sport=s.value;document.querySelectorAll('[data-rs]').forEach(el=>{const x=t.steps[+el.dataset.rs];if(!x)return;const k=el.dataset.rk;if(k==='lbl')x.lbl=el.value;else if(k==='v')x.v=Math.max(5,parseSec(el.value)||30);else if(el.checked)x.both=1;else delete x.both});return}
- if(t.sport==='kraft')document.querySelectorAll('[data-te]').forEach(el=>{const x=t.ex[+el.dataset.te];const k=+el.dataset.tk;if(!x)return;if(k===0)x[0]=el.value;else if(k===3){if(el.checked)x[3]=true;else x.length=3}else x[k]=Math.max(1,Math.round(num(el.value)||1))});
+ if(STR(t.sport))document.querySelectorAll('[data-te]').forEach(el=>{const x=t.ex[+el.dataset.te];const k=+el.dataset.tk;if(!x)return;if(k===0)x[0]=el.value;else if(k===3){if(el.checked)x[3]=true;else x.length=3}else x[k]=Math.max(1,Math.round(num(el.value)||1))});
  else{const s=$('#tsp');if(s)t.sport=s.value;const nn=$('#tnn');if(nn)t.n=Math.max(1,Math.round(num(nn.value)||1));document.querySelectorAll('[data-st]').forEach(el=>{const k=el.dataset.st;const p=t[k]||{m:'t'};const v=p.m==='d'?num(el.value):parseSec(el.value);t[k]=v?{m:p.m,v}:(p.m?{m:p.m,v:null}:null)})}}
 function tMove(i,d){tSync();const a=tdraft.ex;const j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];$('#tex').innerHTML=tplExRows()}
 function saveTpl(){tSync();const t=tdraft;if(!t.name.trim())return toast('Namen angeben');t.name=t.name.trim();
- if(t.sport==='kraft'){t.ex=t.ex.filter(x=>x[0]&&x[0].trim()).map(x=>{x[0]=x[0].trim();return x});if(!t.ex.length)return toast('Mindestens eine Übung');t.ex.forEach(x=>ensureEx(x[0]))}
+ if(STR(t.sport)){t.ex=t.ex.filter(x=>x[0]&&x[0].trim()).map(x=>{x[0]=x[0].trim();return x});if(!t.ex.length)return toast('Mindestens eine Übung');t.ex.forEach(x=>ensureEx(x[0]))}
  else if(t.steps){t.steps=t.steps.filter(x=>x.lbl&&x.lbl.trim());if(!t.steps.some(x=>!x.p))return toast('Mindestens eine Übung')}
  else if(!t.work||!t.work.v)return toast('Intervall / Hauptteil angeben');
  delete t._new;const i=db.templates.findIndex(x=>x.id===t.id);if(i>=0)db.templates[i]=t;else db.templates.push(t);save();closeSheet();render();toast('Vorlage gespeichert')}
@@ -845,16 +898,17 @@ function saveTpl(){tSync();const t=tdraft;if(!t.name.trim())return toast('Namen 
 function startChooser(){if(db.live)return go('live');
  const at=ausdTpls();
  openSheet(`<div class="row sb"><h2>Training starten</h2><button class="ghost" onclick="closeSheet()">✕</button></div>
- <p class="lbl">🏋️ Krafttraining</p><div class="grid2">${kraftTpls().map(t=>`<button onclick="startLive('kraft','${t.id}')">${esc(t.name)}</button>`).join('')}<button onclick="startLive('kraft')">Freies Training</button></div>
+ <p class="lbl">🏋️ Krafttraining</p><div class="grid2">${kraftTpls().filter(t=>t.sport==='kraft').map(t=>`<button onclick="startLive('kraft','${t.id}')">${esc(t.name)}</button>`).join('')}<button onclick="startLive('kraft')">Freies Training</button></div>
+ <p class="lbl" style="margin-top:14px">🏠 Homeworkout</p><div class="grid2">${kraftTpls().filter(t=>t.sport==='home').map(t=>`<button onclick="startLive('home','${t.id}')">${esc(t.name)}</button>`).join('')}<button onclick="startLive('home')">Freies Homeworkout</button></div>
  ${at.length?`<p class="lbl" style="margin-top:14px">⏱ Geführte Vorlagen</p>${at.map(t=>`<button style="width:100%;text-align:left;margin:3px 0" onclick="startLive('${t.sport}','${t.id}')">${sp(t.sport).i} ${esc(t.name)}<div class="muted">${esc(tplSummary(t))}</div></button>`).join('')}`:''}
- <p class="lbl" style="margin-top:14px">Freies Training (Stoppuhr${'bluetooth' in navigator?' + Live-Puls':''})</p><div class="sgrid">${Object.entries(allSports()).filter(([k])=>k!=='kraft').map(([k,s])=>`<button class="sg" onclick="startLive('${k}')"><span>${s.i}</span>${esc(s.n)}</button>`).join('')}</div>`)}
+ <p class="lbl" style="margin-top:14px">Freies Training (Stoppuhr${'bluetooth' in navigator?' + Live-Puls':''})</p><div class="sgrid">${Object.entries(allSports()).filter(([k])=>!STR(k)).map(([k,s])=>`<button class="sg" onclick="startLive('${k}')"><span>${s.i}</span>${esc(s.n)}</button>`).join('')}</div>`)}
 function expandSteps(t){if(t.steps){const a=[];for(const s of t.steps){if(s.both){a.push({lbl:s.lbl+' – links',k:'work',m:'t',v:s.v});a.push({lbl:s.lbl+' – rechts',k:'work',m:'t',v:s.v})}else a.push({lbl:s.lbl,k:s.p?'rest':'work',m:'t',v:s.v})}return a}const a=[];if(t.warm&&t.warm.v)a.push({lbl:'Aufwärmen',k:'warm',m:t.warm.m,v:t.warm.v});const n=t.n||1;
  for(let i=0;i<n;i++){a.push({lbl:n>1?`Intervall ${i+1}/${n}`:'Hauptteil',k:'work',m:t.work.m,v:t.work.v});if(t.rest&&t.rest.v&&i<n-1)a.push({lbl:'Pause',k:'rest',m:t.rest.m,v:t.rest.v})}
  if(t.cool&&t.cool.v)a.push({lbl:'Ausklang',k:'cool',m:t.cool.m,v:t.cool.v});return a}
 function startLive(sport,tid){closeSheet();const t=db.templates.find(x=>x.id===tid);
- const L={id:uid(),sport,start:Date.now(),title:t?t.name:(sport==='kraft'?'Freies Training':''),ex:[],cur:0,timer:false,rest:90,restEnd:null,hr:[],laps:[],pausedMs:0,paused:null};
- if(t&&sport==='kraft'){L.ex=t.ex.map(([n,s,r])=>({name:n,target:r,sets:prefillSets(n,s,r,false)}));t.ex.forEach((x,i)=>{if(x[3]&&i>0){const id=L.ex[i-1].ss||(L.ex[i-1].ss='g'+uid());L.ex[i].ss=id}})}
- if(t&&sport!=='kraft'){L.steps=expandSteps(t);L.si=0;L.sst=0;L.slog=[];L.tplKind=(t.steps?null:t.n>1?'Intervall':null)}
+ const L={id:uid(),sport,start:Date.now(),title:t?t.name:(sport==='kraft'?'Freies Training':sport==='home'?'Freies Homeworkout':''),ex:[],cur:0,timer:false,rest:90,restEnd:null,hr:[],laps:[],pausedMs:0,paused:null};
+ if(t&&STR(sport)){L.ex=t.ex.map(([n,s,r])=>({name:n,target:r,sets:prefillSets(n,s,r,false)}));t.ex.forEach((x,i)=>{if(x[3]&&i>0){const id=L.ex[i-1].ss||(L.ex[i-1].ss='g'+uid());L.ex[i].ss=id}})}
+ if(t&&!STR(sport)){L.steps=expandSteps(t);L.si=0;L.sst=0;L.slog=[];L.tplKind=(t.steps?null:t.n>1?'Intervall':null)}
  if(gpsCapable(sport))L.gps={on:false,pts:[],dist:0};
  db.live=L;save();go('live');wake()}
 function elapsedS(L){return (Date.now()-L.start-L.pausedMs-(L.paused?Date.now()-L.paused:0))/1000}
@@ -871,19 +925,19 @@ function vLive(){const L=db.live;if(!L){setTimeout(()=>go('heute'));return ''}co
  <button class="tb" data-act="lock" onclick="lockOn()"><span class="i">🔒</span>Sperren</button></div></div>`;
  if(L.paused)h+=`<div class="rest" style="background:var(--yel2);color:var(--yel)">⏸ Training pausiert – Zeit steht</div>`;
  h+=`<div id="restbox"></div>`;
- if(L.sport==='kraft'){const x=L.ex[L.cur];const gl=ssLetters(L.ex);
-  h+=`<div class="scroll-x">${L.ex.map((y,i)=>`<span class="chip ${i===L.cur?'on':''} ${y.ss?'ss':''}" onclick="db.live.cur=${i};save();render()">${y.sets.every(s=>s.done)&&y.sets.length?'✓ ':''}${gl[i]?gl[i]+' ':''}${esc(y.name)}</span>`).join('')}<span class="chip" onclick="liveAddEx()">＋ Übung</span></div>`;
-  if(x){const last=lastExercise(x.name,L.start);const lw=last?last.filter(t=>t.type!=='w'):[];const b=bestBefore(x.name,L.start);const curIdx=x.sets.findIndex(s=>!s.done);const nx=L.ex[L.cur+1];const linked=x.ss&&nx&&nx.ss===x.ss;const pr=progHint(x,lw);const tm=isTimed(x.name);
-   h+=`<div class="card ${x.ss?'ss':''}"><div class="row sb"><h3 style="margin:0">${gl[L.cur]?'<span style="color:var(--gold)">'+gl[L.cur]+'</span> ':''}${esc(x.name)}</h3><div class="row" style="gap:0"><button class="sm ghost" onclick="moveEx(-1)" aria-label="Übung nach vorn">◀</button><button class="sm ghost" onclick="moveEx(1)" aria-label="Übung nach hinten">▶</button><button class="sm ghost" onclick="showExChart(decodeURIComponent('${enc(x.name)}'))" aria-label="Verlauf">📈</button><button class="sm ghost danger" onclick="liveDelEx()" aria-label="Übung entfernen">✕</button></div></div>
-   <p class="muted" style="margin:2px 0 6px">${lw.length?'Letztes Mal: '+(tm?lw.map(s=>(s.reps??0)+' s').join(', '):lw.map(s=>(s.reps??'–')+'×'+(s.weight??0).toLocaleString('de-DE')).join(', ')+' kg'):'Neue Übung'}${b&&!tm?' · Bestwert '+b.toLocaleString('de-DE')+' kg':''}</p>
+ if(STR(L.sport)){const x=L.ex[L.cur];const gl=ssLetters(L.ex);
+  h+=`<div class="scroll-x">${L.ex.map((y,i)=>`<span class="chip ${i===L.cur?'on':''} ${y.ss?'ss':''}" data-exi="${i}" onclick="exChip(${i})" onpointerdown="lpStart(${i})" onpointerup="lpEnd()" onpointerleave="lpEnd()" onpointercancel="lpEnd()" oncontextmenu="event.preventDefault()">${y.sets.every(s=>s.done)&&y.sets.length?'✓ ':''}${gl[i]?gl[i]+' ':''}${esc(y.name)}</span>`).join('')}<span class="chip" onclick="liveAddEx()">＋ Übung</span></div>`;
+  if(x){const last=lastExercise(x.name,L.start);const lw=last?last.filter(t=>t.type!=='w'):[];const b=bestBefore(x.name,L.start);const curIdx=x.sets.findIndex(s=>!s.done);const nx=L.ex[L.cur+1];const linked=x.ss&&nx&&nx.ss===x.ss;const pr=progHint(x,lw);const tm=isTimed(x.name);const bw=!tm&&isBW(x.name)&&!x.addKg&&!x.sets.some(s=>s.weight>0);
+   h+=`<div class="card ${x.ss?'ss':''}"><div class="row sb"><h3 style="margin:0" onpointerdown="lpStart(${L.cur})" onpointerup="lpEnd()" onpointerleave="lpEnd()" onpointercancel="lpEnd()" oncontextmenu="event.preventDefault()">${gl[L.cur]?'<span style="color:var(--gold)">'+gl[L.cur]+'</span> ':''}${esc(x.name)}</h3><div class="row" style="gap:0"><button class="sm ghost" onclick="showExChart(decodeURIComponent('${enc(x.name)}'))" aria-label="Verlauf">📈</button><button class="sm ghost" id="exmenu" onclick="exMenu(${L.cur})" aria-label="Übung verschieben, ersetzen oder entfernen">⋯</button></div></div>
+   <p class="muted" style="margin:2px 0 6px">${lw.length?'Letztes Mal: '+(tm?lw.map(s=>(s.reps??0)+' s').join(', '):bw?lw.map(s=>(s.reps??0)+' Wdh.').join(', '):lw.map(s=>(s.reps??'–')+'×'+(s.weight??0).toLocaleString('de-DE')).join(', ')+' kg'):'Neue Übung'}${b&&!tm?' · Bestwert '+b.toLocaleString('de-DE')+' kg':''}</p>
    ${pr?`<div class="hint"><span>💡 ${pr.t}</span>${pr.btn?`<button class="sm" onclick="applyProg()">${pr.btn}</button>`:''}</div>`:''}
-   <div class="sethead"><span></span><span>${tm?'Ziel (Sek.)':'Wdh.'}</span><span>${tm?'Timer':'kg'}</span><span></span></div>
-   ${x.sets.map((s,j)=>{const run=L.tmr&&L.tmr.ex===L.cur&&L.tmr.set===j;return `<div class="set ${s.done?'done':''} ${j===curIdx?'cur':''} ${s.type==='w'?'warm':''}"><span class="stype" onclick="lType(${j})">${setLabel(x.sets,j)}</span>
+   <div class="sethead ${bw?'bw':''}"><span></span><span>${tm?'Ziel (Sek.)':'Wdh.'}</span>${bw?'':`<span>${tm?'Timer':'kg'}</span>`}<span></span><span></span></div>
+   ${x.sets.map((s,j)=>{const run=L.tmr&&L.tmr.ex===L.cur&&L.tmr.set===j;return `<div class="set ${bw?'bw':''} ${s.done?'done':''} ${j===curIdx?'cur':''} ${s.type==='w'?'warm':''}"><span class="stype" onclick="lType(${j})">${setLabel(x.sets,j)}</span>
    <div class="step"><button onclick="lv(${j},'reps',${tm?-5:-1})">−</button><input id="in_${j}_reps" value="${s.reps??0}" inputmode="numeric" onfocus="this.select()" onchange="lset(${j},'reps',this.value)" aria-label="${tm?'Sekunden':'Wiederholungen'}"><button onclick="lv(${j},'reps',${tm?5:1})">+</button></div>
-   ${tm?`<button class="tmrb ${run?'on':''}" id="tmr${j}" onclick="tmrToggle(${j})">${run?'■ …':(s.done?'✓ '+(s.reps||0)+' s':(s.reps?'▶ Start':'▶ Stoppuhr'))}</button>`:`<div class="step"><button onclick="lv(${j},'weight',-2.5)">−</button><input id="in_${j}_weight" value="${(s.weight??0).toLocaleString('de-DE')}" inputmode="decimal" onfocus="this.select()" onchange="lset(${j},'weight',this.value)" aria-label="Gewicht in kg"><button onclick="lv(${j},'weight',2.5)">+</button></div>`}
-   <button class="chk" onclick="lDone(${j})">✓</button></div>`}).join('')}
-   <p class="muted" style="font-size:11px;margin:4px 0 0">${tm?'Ziel 0 = Stoppuhr zählt hoch · ':''}„Satz“ antippen ändert die Satzart · Änderungen gelten auch für die folgenden offenen Sätze</p>
-   <div class="row" style="margin-top:8px;flex-wrap:wrap"><button class="sm" onclick="lAddSet()">＋ Satz</button><button class="sm" onclick="lAddSet('w')">＋ Aufwärmsatz</button>${nx?`<button class="sm" onclick="toggleSS()">${linked?'⇄ Supersatz lösen':'⇄ Supersatz mit '+esc(nx.name)}</button>`:''}${L.cur<L.ex.length-1?`<button class="sm" style="margin-left:auto" onclick="db.live.cur++;save();render()">Nächste →</button>`:''}</div></div>`}
+   ${bw?'':tm?`<button class="tmrb ${run?'on':''}" id="tmr${j}" onclick="tmrToggle(${j})">${run?'■ …':(s.done?'✓ '+(s.reps||0)+' s':(s.reps?'▶ Start':'▶ Stoppuhr'))}</button>`:`<div class="step"><button onclick="lv(${j},'weight',-2.5)">−</button><input id="in_${j}_weight" value="${(s.weight??0).toLocaleString('de-DE')}" inputmode="decimal" onfocus="this.select()" onchange="lset(${j},'weight',this.value)" aria-label="Gewicht in kg"><button onclick="lv(${j},'weight',2.5)">+</button></div>`}
+   <button class="chk" onclick="lDone(${j})">✓</button><button class="sdel" data-del="${j}" onclick="lDel(${j})" aria-label="Satz löschen">✕</button></div>`}).join('')}
+   <p class="muted" style="font-size:11px;margin:4px 0 0">${tm?'Ziel 0 = Stoppuhr zählt hoch · ':''}„Satz“ antippen ändert die Satzart · Übung lange drücken zum Umsortieren · Änderungen gelten auch für die folgenden offenen Sätze</p>
+   <div class="row" style="margin-top:8px;flex-wrap:wrap"><button class="sm" onclick="lAddSet()">＋ Satz</button><button class="sm" onclick="lAddSet('w')">＋ Aufwärmsatz</button>${bw?`<button class="sm" id="addkg" onclick="db.live.ex[db.live.cur].addKg=1;save();render()">＋ kg</button>`:''}${nx?`<button class="sm" onclick="toggleSS()">${linked?'⇄ Supersatz lösen':'⇄ Supersatz mit '+esc(nx.name)}</button>`:''}${L.cur<L.ex.length-1?`<button class="sm" style="margin-left:auto" onclick="db.live.cur++;save();render()">Nächste →</button>`:''}</div></div>`}
   else h+=`<div class="empty">Füge deine erste Übung hinzu.</div><button style="width:100%" onclick="liveAddEx()">＋ Übung</button>`;
   h+=`<div class="card"><div class="row sb"><span>⏱ Pausentimer</span><span class="chip ${L.timer?'on':''}" onclick="db.live.timer=!db.live.timer;db.live.restEnd=null;save();render()">${L.timer?'an':'aus'}</span></div>
   ${L.timer?`<div class="chips" style="margin-top:8px">${[60,90,120,180].map(s=>`<span class="chip ${L.rest===s?'on':''}" onclick="db.live.rest=${s};save();render()">${fmtSec(s)}</span>`).join('')}</div><p class="muted" style="margin:6px 0 0">Bei Supersätzen startet die Pause erst nach der letzten Übung der Runde.</p>`:''}</div>`}
@@ -944,11 +998,11 @@ let msel=null;
 function musclePicker(id){return `<div class="chips" id="${id}">${MUS.map(([k,n])=>{const st=msel.m.includes(k)?'on':msel.s.includes(k)?'w1':'';return `<span class="chip ${st}" style="font-size:13px" onclick="mCycle('${k}','${id}')">${n}</span>`}).join('')}</div>`}
 const MHINT=`<p class="muted" style="margin:6px 0 0;font-size:12px">Antippen: <b style="color:var(--acc)">Hauptmuskel</b> → <b style="color:var(--yel)">Nebenmuskel</b> → aus</p>`;
 function mCycle(k,id){if(msel.m.includes(k)){msel.m=msel.m.filter(x=>x!==k);msel.s.push(k)}else if(msel.s.includes(k))msel.s=msel.s.filter(x=>x!==k);else msel.m.push(k);const el=$('#'+id);if(el)el.outerHTML=musclePicker(id)}
-function liveAddEx(){msel={m:[],s:[]};
+function liveAddEx(){REPL=null;msel={m:[],s:[]};
  openSheet(`<h2>Übung hinzufügen</h2><input id="nex" placeholder="z. B. Bankdrücken" list="exl" oninput="const l=libEx(this.value);$('#nexg').style.display=l||!this.value.trim()?'none':'block';if(!l&&this.value.trim().length>3&&!msel.m.length&&!msel.s.length){msel=guessMuscles(this.value);msel={m:[...msel.m],s:[...msel.s]};$('#mp').outerHTML=musclePicker('mp')}">${exDatalist()}
  <div id="nexg" class="f" style="display:none"><label>Neue Übung – welche Muskeln?</label>${musclePicker('mp')}${MHINT}</div>
  <button class="pri" style="width:100%;margin-top:10px" onclick="liveAddExGo()">Hinzufügen</button>`);setTimeout(()=>{const n=$('#nex');n&&n.focus()},50)}
-function liveAddExGo(){const n=$('#nex').value.trim();if(!n)return;if(!libEx(n))ensureEx(n,msel);db.live.ex.push({name:n,sets:prefillSets(n,null,null,false)});db.live.cur=db.live.ex.length-1;save();closeSheet();render()}
+function liveAddExGo(){const n=$('#nex').value.trim();if(!n)return;if(!libEx(n))ensureEx(n,msel);const nx={name:n,sets:prefillSets(n,null,null,false)};if(REPL!=null&&db.live.ex[REPL]){if(db.live.ex[REPL].ss)nx.ss=db.live.ex[REPL].ss;db.live.ex[REPL]=nx;db.live.cur=REPL;db.live.tmr=null;REPL=null}else{db.live.ex.push(nx);db.live.cur=db.live.ex.length-1}save();closeSheet();render()}
 function editExercise(name){const x=libEx(name);msel=x?{m:[...(x.m||[])],s:[...(x.s||[])]}:{m:[],s:[]};
  openSheet(`<div class="row sb"><h2>${esc(name)}</h2><button class="ghost" onclick="closeSheet()">✕</button></div>${musclePicker('mp')}${MHINT}
  <button class="pri" style="width:100%;margin-top:12px" onclick="saveExercise(decodeURIComponent('${enc(name)}'))">Speichern</button><button class="ghost danger" style="width:100%;margin-top:6px" onclick="db.exercises=db.exercises.filter(y=>y.n!==decodeURIComponent('${enc(name)}'));save();closeSheet();render();toast('Übung gelöscht')">Übung löschen</button>`)}
@@ -959,7 +1013,7 @@ function liveFinish(){const L=db.live;if(L.paused){L.pausedMs+=Date.now()-L.paus
  if(gpsWatch!=null)navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;
  const dur=Math.max(1,Math.round(elapsedS(L)/60));
  const e={id:L.id,start:new Date(L.start).toISOString(),sport:L.sport,duration:dur,source:'live',confirmed:true,pains:{},title:L.title||''};
- if(L.sport==='kraft')e.ex=L.ex.map(x=>({name:x.name,...(x.ss?{ss:x.ss}:{}),sets:x.sets.filter(s=>s.done).map(s=>({reps:s.reps,weight:s.weight,done:true,...(s.type?{type:s.type}:{})}))})).filter(x=>x.sets.length);
+ if(STR(L.sport))e.ex=L.ex.map(x=>({name:x.name,...(x.ss?{ss:x.ss}:{}),sets:x.sets.filter(s=>s.done).map(s=>({reps:s.reps,weight:s.weight,done:true,...(s.type?{type:s.type}:{})}))})).filter(x=>x.sets.length);
  if(L.hr.length){e.hrAvg=Math.round(L.hr.reduce((a,b)=>a+b,0)/L.hr.length);e.hrMax=Math.max(...L.hr);const zz=zonesFromSamples(L.hr,dur);if(zz)e.zones=zz}
  if(L.catches)e.catches=L.catches;
  if(L.sport==='hyrox'&&L.laps.length){e.hx={runs:[],st:[]};L.laps.forEach((t,i)=>{if(i%2===0)e.hx.runs[i/2]=t;else e.hx.st[(i-1)/2]=t});e.hyroxTotal=L.laps.reduce((a,b)=>a+b,0)}
@@ -998,7 +1052,7 @@ function planSeg(k){const p=db.hyroxPlan||{runs:[],st:[]};return k%2===0?p.runs[
 function hasPlan(){const p=db.hyroxPlan||{};return[...(p.runs||[]),...(p.st||[])].some(v=>v)}
 function planDelta(laps){let d=0,any=false;laps.forEach((t,i)=>{const p=planSeg(i);if(p){d+=t-p;any=true}});return any?d:null}
 /* Übungsverlauf */
-function exHistory(name){const out=[];for(const e of db.entries.slice().sort((a,b)=>ts(a)-ts(b))){if(e.sport!=='kraft'||!e.ex)continue;const x=e.ex.find(y=>y.name.toLowerCase()===name.toLowerCase());if(!x)continue;const w=(x.sets||[]).filter(isWork);if(!w.length)continue;
+function exHistory(name){const out=[];for(const e of db.entries.slice().sort((a,b)=>ts(a)-ts(b))){if(!STR(e.sport)||!e.ex)continue;const x=e.ex.find(y=>y.name.toLowerCase()===name.toLowerCase());if(!x)continue;const w=(x.sets||[]).filter(isWork);if(!w.length)continue;
  out.push({d:e.start,w:Math.max(...w.map(t=>t.weight||0)),e1:Math.max(...w.map(t=>(t.weight||0)*(1+(t.reps||1)/30))),r:Math.max(...w.map(t=>t.reps||0)),sets:w})}return out}
 function chartSvg(name){const h=exHistory(name).slice(-20);if(!h.length)return '<p class="muted">Noch keine Daten zu dieser Übung.</p>';const bw=h.every(p=>!p.w);
  const A=bw?h.map(p=>p.r):h.map(p=>p.w),B=bw||!db.settings.show1rm?null:h.map(p=>p.e1);const all=[...A,...(B||[])];let lo=Math.min(...all),hi=Math.max(...all);if(hi===lo){hi+=5;lo=Math.max(0,lo-5)}const pd=(hi-lo)*0.1;lo-=pd;hi+=pd;
@@ -1010,6 +1064,24 @@ function chartSvg(name){const h=exHistory(name).slice(-20);if(!h.length)return '
  <p class="muted" style="margin:4px 0 0"><span style="color:var(--acc)">●</span> ${bw?(isTimed(name)?'Längste Zeit (Sek.)':'Max. Wiederholungen'):'Max. Gewicht (kg)'}${B?' · <span style="color:var(--gold)">●</span> geschätztes Maximum (1RM)':''}</p>
  <div style="margin-top:8px;font-size:13px">${h.slice(-5).reverse().map(p=>`<div class="row sb" style="padding:3px 0;border-bottom:1px solid var(--line)"><span>${fmtD(p.d)}</span><span>${p.sets.map(t=>isTimed(name)?(t.reps??0)+' s':(t.reps??0)+'×'+(t.weight||0).toLocaleString('de-DE')).join(', ')}</span></div>`).join('')}</div>`}
 function showExChart(name){openSheet(`<div class="row sb"><h2>📈 ${esc(name)}</h2><button class="ghost" onclick="closeSheet()">✕</button></div>${chartSvg(name)}`)}
+
+/* Satz löschen, Übungsmenü (lange drücken) */
+function lDel(j){const L=db.live,ci=L.cur,x=L.ex[ci];const [old]=x.sets.splice(j,1);if(L.tmr&&L.tmr.ex===ci)L.tmr=null;save();render();
+ toastUndo('Satz gelöscht',()=>{const y=db.live&&db.live.ex[ci];if(!y)return;y.sets.splice(j,0,old);save();render()})}
+let lpT=null,lpF=false;
+function lpStart(i){lpF=false;clearTimeout(lpT);lpT=setTimeout(()=>{lpF=true;try{navigator.vibrate&&navigator.vibrate(20)}catch(e){}exMenu(i)},500)}
+function lpEnd(){clearTimeout(lpT)}
+function exChip(i){if(lpF){lpF=false;return}db.live.cur=i;save();render()}
+function exOrderHtml(sel){const n=db.live.ex.length;return db.live.ex.map((y,k)=>`<div class="row sb exo ${k===sel?'on':''}"><span>${k+1}. ${esc(y.name)}</span><span style="white-space:nowrap"><button class="sm ghost" data-up="${k}" ${k?'':'disabled'} onclick="exMove(${k},-1,${sel})" aria-label="nach oben">↑</button><button class="sm ghost" data-dn="${k}" ${k<n-1?'':'disabled'} onclick="exMove(${k},1,${sel})" aria-label="nach unten">↓</button></span></div>`).join('')}
+function exMenu(i){const x=db.live&&db.live.ex[i];if(!x)return;
+ openSheet(`<div class="row sb"><h2>${esc(x.name)}</h2><button class="ghost" onclick="closeSheet()">✕</button></div>
+ <div class="grid2"><button onclick="exReplace(${i})">🔁 Übung ersetzen</button><button class="danger" onclick="exRemove(${i})">✕ Übung entfernen</button></div>
+ <p class="lbl" style="margin-top:14px">Reihenfolge ändern</p><div id="exord">${exOrderHtml(i)}</div><button class="pri" style="width:100%;margin-top:10px" onclick="closeSheet()">Fertig</button>`)}
+function exMove(k,d,sel){const L=db.live;const j=k+d;if(j<0||j>=L.ex.length)return;const cur=L.ex[L.cur];[L.ex[k],L.ex[j]]=[L.ex[j],L.ex[k]];L.cur=L.ex.indexOf(cur);L.tmr=null;
+ const ns=sel===k?j:sel===j?k:sel;save();render();const o=$('#exord');if(o)o.innerHTML=exOrderHtml(ns)}
+function exRemove(i){const L=db.live;L.ex.splice(i,1);L.tmr=null;L.cur=Math.max(0,Math.min(L.cur>i?L.cur-1:L.cur,L.ex.length-1));save();closeSheet();render()}
+let REPL=null;
+function exReplace(i){closeSheet();liveAddEx();REPL=i;const h=$('#ovl h2');if(h)h.textContent='Übung ersetzen';const b=$('#ovl button.pri');if(b)b.textContent='Ersetzen'}
 
 /* ---------- Strecken, Karte, GPS, Sperre ---------- */
 const GPS_SPORTS=['laufen','gravel','wandern','langlauf','ski','golf','sonst'];
@@ -1089,7 +1161,7 @@ function lockOn(){if(locked)return;locked=true;const o=document.createElement('d
 function lockOff(){locked=false;const o=$('#lock');if(o)o.remove()}
 function updLock(){if(!locked)return;const L=db.live;if(!L){lockOff();return}const s=elapsedS(L);const set=(id,t)=>{const e=$('#'+id);if(e)e.textContent=t};
  set('lk_el',fmtSec(s)+(L.paused?' ⏸':''));const g=L.gps;
- set('lk_l1',g&&g.pts.length?fmtKm(g.dist/1000)+' km · '+(()=>{const c=curSpeed(g);return c?speedTxt(L.sport,c.d,c.dt):'–'})():(L.sport==='kraft'&&L.ex[L.cur]?L.ex[L.cur].name:sp(L.sport).n));
+ set('lk_l1',g&&g.pts.length?fmtKm(g.dist/1000)+' km · '+(()=>{const c=curSpeed(g);return c?speedTxt(L.sport,c.d,c.dt):'–'})():(STR(L.sport)&&L.ex[L.cur]?L.ex[L.cur].name:sp(L.sport).n));
  set('lk_l2',hrDev&&lastHr?'♥ '+lastHr:'');
  let st='';if(L.steps&&L.steps[L.si]){const x=L.steps[L.si];const inS=s-L.sst;st=x.lbl+' · '+(x.m==='t'?'noch '+fmtSec(Math.ceil(x.v-inS)):(g&&g.on?'noch '+fmtM(Math.max(0,x.v-(g.dist-(L.sd0||0)))):fmtM(x.v)))}
  else if(L.restEnd){const left=(L.restEnd-Date.now())/1000;if(left>0)st='Pause: '+fmtSec(left)}
@@ -1099,7 +1171,7 @@ function updLock(){if(!locked)return;const L=db.live;if(!L){lockOff();return}con
 function mapSport(s){s=(s||'').toLowerCase();
  if(/hyrox|crossfit|circuit|functional/.test(s))return'hyrox';if(/spinning|indoor.?cycl|indoor.?bik/.test(s))return'spinning';if(/cross.?country|langlauf|nordic.?ski/.test(s))return'langlauf';if(/alpine|downhill|ski|snowboard/.test(s))return'ski';
  if(/run|lauf|jog/.test(s))return'laufen';if(/cycl|bik|rad|gravel|ride/.test(s))return'gravel';if(/swim|schwimm/.test(s))return'schwimmen';if(/strength|kraft|gym|weight/.test(s))return'kraft';
- if(/padel/.test(s))return'padel';if(/handball/.test(s))return'handball';if(/squash/.test(s))return'squash';if(/golf/.test(s))return'golf';if(/yoga|pilates|mobility|stretch/.test(s))return'yoga';if(/walk|hik|wander|trek/.test(s))return'wandern';return'sonst'}
+ if(/padel/.test(s))return'padel';if(/handball/.test(s))return'handball';if(/pilates/.test(s))return'pilates';if(/rope|seil/.test(s))return'seil';if(/squash/.test(s))return'squash';if(/golf/.test(s))return'golf';if(/yoga|pilates|mobility|stretch/.test(s))return'yoga';if(/walk|hik|wander|trek/.test(s))return'wandern';return'sonst'}
 function tcxTrack(a){const out=[];let t0=null;for(const tp of a.getElementsByTagNameNS('*','Trackpoint')){const la=tp.getElementsByTagNameNS('*','LatitudeDegrees')[0],lo=tp.getElementsByTagNameNS('*','LongitudeDegrees')[0];if(!la||!lo)continue;
  const tm=tp.getElementsByTagNameNS('*','Time')[0];const t=tm?Date.parse(tm.textContent):NaN;if(t0==null&&!isNaN(t))t0=t;const al=tp.getElementsByTagNameNS('*','AltitudeMeters')[0];const hrE=tp.getElementsByTagNameNS('*','HeartRateBpm')[0];const hv=hrE?hrE.getElementsByTagNameNS('*','Value')[0]:null;
  out.push([r5(+la.textContent),r5(+lo.textContent),isNaN(t)?out.length:Math.round((t-t0)/1000),al?Math.round(+al.textContent):null,hv?+hv.textContent:null])}return thin(out)}
@@ -1193,9 +1265,9 @@ function vStatistik(){if(!db.entries.length)return `<div class="empty">Sobald du
  let h=`<div class="card"><p class="lbl">Belastung der letzten 8 Wochen</p><div class="wk" style="height:90px">${w8.map(x=>{const A=acwr(Math.min(now,x.a+7*DAY-1));const z=zone(A.ratio);return `<div><i style="height:${Math.max(4,x.L/mx*100)}%;background:${x.L&&A.chronic>0?z.c:x.L?'var(--acc)':'var(--line)'}"></i><span>${new Date(x.a).getDate()}.${new Date(x.a).getMonth()+1}.</span></div>`}).join('')}</div><p class="muted" style="margin:6px 0 0">Farbe = Zone am Wochenende: blau unterfordert, grün optimal, gelb erhöht, rot Überlastung.</p></div>`;
  const ms=new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime();const lm=between(ms,now+1);const per={};lm.forEach(e=>per[e.sport]=(per[e.sport]||0)+(e.duration||0));const pm=Math.max(1,...Object.values(per));
  h+=`<div class="card"><p class="lbl">Dieser Monat nach Sportart</p>${Object.keys(per).length?`<div class="hbars">${Object.entries(per).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="r"><span>${sp(k).i} ${esc(sp(k).n)}</span><div class="bar"><i style="width:${v/pm*100}%"></i></div><span style="text-align:right">${fmtDur(v)}</span></div>`).join('')}</div>`:'<p class="muted">Noch nichts in diesem Monat.</p>'}</div>`;
- const exn=[...new Set(db.entries.filter(e=>e.sport==='kraft').flatMap(e=>(e.ex||[]).filter(x=>(x.sets||[]).some(isWork)).map(x=>x.name)))].sort();
+ const exn=[...new Set(db.entries.filter(e=>STR(e.sport)).flatMap(e=>(e.ex||[]).filter(x=>(x.sets||[]).some(isWork)).map(x=>x.name)))].sort();
  if(exn.length){if(!exn.includes(chartEx))chartEx=exn[0];h+=`<div class="card"><p class="lbl">Übungsverlauf</p><select onchange="chartEx=this.value;render()" style="margin-bottom:8px">${exn.map(n=>`<option ${n===chartEx?'selected':''}>${esc(n)}</option>`).join('')}</select>${chartSvg(chartEx)}</div>`}
- const best={};for(const e of db.entries)if(e.sport==='kraft')for(const x of e.ex||[])for(const s of x.sets||[]){if(!isWork(s)||!s.weight)continue;const k=x.name;const e1=s.weight*(1+(s.reps||1)/30);if(!best[k]||s.weight>best[k].w||(s.weight===best[k].w&&(s.reps||0)>best[k].r))best[k]={w:s.weight,r:s.reps||0,d:e.start,e1:Math.max(e1,best[k]?best[k].e1:0)};else best[k].e1=Math.max(best[k].e1,e1)}
+ const best={};for(const e of db.entries)if(STR(e.sport))for(const x of e.ex||[])for(const s of x.sets||[]){if(!isWork(s)||!s.weight)continue;const k=x.name;const e1=s.weight*(1+(s.reps||1)/30);if(!best[k]||s.weight>best[k].w||(s.weight===best[k].w&&(s.reps||0)>best[k].r))best[k]={w:s.weight,r:s.reps||0,d:e.start,e1:Math.max(e1,best[k]?best[k].e1:0)};else best[k].e1=Math.max(best[k].e1,e1)}
  const runs=db.entries.filter(e=>e.sport==='laufen'&&e.distance&&e.duration);const bp=d=>{const l=runs.filter(e=>e.distance>=d);return l.length?l.reduce((a,b)=>a.duration/a.distance<b.duration/b.distance?a:b):null};
  const r5=bp(5),r10=bp(10),lr=runs.length?runs.reduce((a,b)=>a.distance>b.distance?a:b):null;
  const rides=db.entries.filter(e=>e.sport==='gravel'&&e.distance);const lrd=rides.length?rides.reduce((a,b)=>a.distance>b.distance?a:b):null;const ra=rides.filter(e=>e.ascent);const hrd=ra.length?ra.reduce((a,b)=>a.ascent>b.ascent?a:b):null;
@@ -1227,26 +1299,28 @@ function vErfolge(){const now=new Date();const L=lifeStats();const I=idx();
  const ni=STATIONS.findIndex(s=>s[0]>L.km);const next=ni<0?null:STATIONS[ni];const ci=ni<0?STATIONS.length-1:ni-1;const cur=STATIONS[ci];
  let h=`<div class="card"><h3>Deine Reise nach Mordor</h3>${next?`<p style="margin:0 0 4px">Nächster Wegpunkt: <b>${next[1]}</b></p><p class="muted" style="margin:0 0 6px">${fmtKm(L.km-cur[0])} von ${fmtKm(next[0]-cur[0])} km · ab ${cur[1]}</p>
  <div class="bar gold"><i style="width:${Math.min(100,(L.km-cur[0])/(next[0]-cur[0])*100)}%"></i></div>`:`<p style="margin:0 0 6px">🎉 Alle Wegpunkte erreicht – du bist bei den <b>Grauen Anfurten</b>!</p>`}
- <p class="muted" style="margin:6px 0 0;font-size:12px">Insgesamt ${fmtKm(L.km)} km unterwegs · Schicksalsberg bei 2.860 km</p>
- <details style="margin-top:10px"><summary>Alle Stationen</summary>${STATIONS.map((s,i)=>`<div class="st ${L.km>=s[0]?'ok':''} ${i===ci?'now':''}"><span class="dot"></span><span style="flex:1">${s[1]}</span><span class="muted">${s[0].toLocaleString('de-DE')} km</span></div>`).join('')}
+ <details style="margin-top:10px"><summary>Erreichte Stationen</summary>${STATIONS.filter(s=>L.km>=s[0]).map((s,i)=>`<div class="st ok ${i===ci?'now':''}"><span class="dot"></span><span style="flex:1">${s[1]}</span></div>`).join('')}
  <p class="muted">Laufen und Wandern zählen voll, Rad und Spinning zu ${Math.round(db.settings.bikeFactor*100)} %, Schwimmen dreifach, Langlauf zu 70 %, Sport ohne Strecke mit 1 km pro ${db.settings.minPerKm} min. Ungefähre Wegstrecken, Rückweg inklusive.</p></details></div>`;
  h+=`<button style="width:100%;margin:4px 0" onclick="showRecap(weekStart(new Date()).getTime()-(new Date().getDay()===0?0:7*DAY))">📜 Letzter Wochenrückblick</button>`;
  const wa=I.wAch.get(wkey(now))||[],ma=I.mAch.get(mkey(now))||[];
- const box=(lbl,list,total)=>`<div class="card"><p class="lbl">${lbl}</p>${list.map(a=>`<div class="ach done" style="margin:6px 0;padding:8px 10px"><b style="font-size:14px">🏆 ${esc(a.n)}</b><span style="font-size:12px">${esc(a.d)}</span></div>`).join('')}<div class="ach off" style="margin:6px 0;padding:8px 10px;font-size:13px">🔒 ${total-list.length?`Noch ${total-list.length} verborgene Erfolge – sie zeigen sich, wenn du sie erreichst.`:'Alle Erfolge errungen!'}</div></div>`;
- h+=box('Diese Woche',wa,WCONDS.length)+box('Dieser Monat',ma,MCONDS.length);
+ const box=(lbl,list)=>list.length?`<div class="card"><p class="lbl">${lbl}</p>${list.map(a=>`<div class="ach done" style="margin:6px 0;padding:8px 10px"><b style="font-size:14px">🏆 ${esc(a.n)}</b><span style="font-size:12px">${esc(a.d)}</span></div>`).join('')}</div>`:'';
+ h+=box('Diese Woche',wa)+box('Dieser Monat',ma);
+ const prl=sorted().filter(e=>I.prs.has(e.id)).slice(0,6).flatMap(e=>I.prs.get(e.id).map(p=>({p,e}))).slice(0,8);
+ if(prl.length)h+=`<div class="card" id="prcard"><p class="lbl">⚡ Neue Bestleistungen</p>${prl.map(({p,e})=>`<div class="row sb" style="font-size:14px;padding:4px 0;border-bottom:1px solid var(--line)"><span><b>${esc(p.n)}</b><br><span class="muted" style="font-size:12px">${esc(p.d)}</span></span><span class="muted" style="text-align:right">${fmtD(e.start)}</span></div>`).join('')}</div>`;
  const recent=sorted().filter(e=>e.confirmed!==false).slice(0,10);
  if(recent.length)h+=`<div class="card"><p class="lbl">Zuletzt errungene Tageserfolge</p>${recent.map(e=>{const a=dailyAch(e);return `<div class="row sb" style="font-size:14px;padding:4px 0;border-bottom:1px solid var(--line)"><span>${a.gold?'🌟':'🏆'} ${esc(a.n)}</span><span class="muted" style="text-align:right">${sp(e.sport).i} ${fmtD(e.start)}</span></div>`}).join('')}</div>`;
  let wN=0,mN=0;I.wAch.forEach(v=>wN+=v.length);I.mAch.forEach(v=>mN+=v.length);const dN=db.entries.filter(e=>e.confirmed!==false).length;
- h+=`<div class="card"><p class="lbl">Bisher errungen</p><div style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center"><div><b style="font-size:22px">${dN}</b><div class="muted">Tageserfolge</div></div><div><b style="font-size:22px">${wN}</b><div class="muted">Wochenerfolge</div></div><div><b style="font-size:22px">${mN}</b><div class="muted">Monatserfolge</div></div></div></div>`;
- const y=yearGoals(now.getFullYear());h+=`<div class="card"><h3>Jahreserfolge ${now.getFullYear()}</h3>${y.map(g=>`<div style="margin:8px 0"><b style="font-size:14px">${g.p>=1?'🏆 ':''}${g.n}</b> <span class="muted">${g.d}</span>${g.txt?`<div class="muted" style="font-size:12px">${g.txt}</div>`:''}<div class="bar gold"><i style="width:${Math.round(g.p*100)}%"></i></div></div>`).join('')}</div>`;
- h+=`<div class="card"><h3>Lebenserfolge</h3>${LIFE.map(g=>{const v=L[g.k];return g.lv.map(([t,n])=>`<div class="ach ${v>=t?'':'off'}" style="margin:6px 0;padding:8px 10px"><div class="row sb"><b style="font-size:14px">${v>=t?'🏆 ':''}${n}</b><span style="font-size:12px">${t.toLocaleString('de-DE')} ${t===1&&g.k==='n'?'Einheit':g.u}</span></div>${v<t?`<div class="bar gold" style="margin-top:4px"><i style="width:${Math.min(100,v/t*100)}%"></i></div>`:''}</div>`).join('')}).join('')}</div>`;
+ h+=`<div class="card"><p class="lbl">Bisher errungen</p><div style="display:grid;grid-template-columns:repeat(4,1fr);text-align:center"><div><b style="font-size:22px">${dN}</b><div class="muted" style="font-size:12px">Tag</div></div><div><b style="font-size:22px">${wN}</b><div class="muted" style="font-size:12px">Woche</div></div><div><b style="font-size:22px">${mN}</b><div class="muted" style="font-size:12px">Monat</div></div><div><b style="font-size:22px">${L.pr}</b><div class="muted" style="font-size:12px">Bestleistung</div></div></div></div>`;
+ const y=yearGoals(now.getFullYear()).filter(g=>g.p>=1);if(y.length)h+=`<div class="card"><h3>Jahreserfolge ${now.getFullYear()}</h3>${y.map(g=>`<div class="ach done" style="margin:6px 0;padding:8px 10px"><b style="font-size:14px">🏆 ${g.n}</b><span style="font-size:12px">${g.d}</span></div>`).join('')}</div>`;
+ const life=LIFE.flatMap(g=>g.lv.filter(([t])=>L[g.k]>=t).map(([t,n])=>({t,n,u:g.u,k:g.k})));
+ h+=`<div class="card" id="lifecard"><h3>Lebenserfolge</h3>${life.length?life.map(a=>`<div class="ach done" style="margin:6px 0;padding:8px 10px"><div class="row sb"><b style="font-size:14px">🏆 ${a.n}</b><span style="font-size:12px">${a.t.toLocaleString('de-DE')} ${a.t===1?a.u.replace(/^Einheiten/,'Einheit').replace(/^Bestleistungen/,'Bestleistung').replace(/^Wettkämpfe/,'Wettkampf').replace(/^Siege/,'Sieg'):a.u}</span></div></div>`).join(''):'<p class="muted" style="margin:0">Deine Lebenserfolge erscheinen hier, sobald du sie erreichst.</p>'}<p class="muted" style="margin:8px 0 0;font-size:12px">Weitere Erfolge bleiben verborgen, bis du sie erreichst.</p></div>`;
  return h}
 
 /* ---------- Einstellungen ---------- */
 function vSettings(){const s=db.settings;const kt=kraftTpls(),at=ausdTpls();
  const exByG={};db.exercises.forEach(x=>(exByG[x.g]=exByG[x.g]||[]).push(x));
  return polarCard()+` <div class="card"><h3>📋 Vorlagen</h3><p class="lbl">🏋️ Krafttraining</p>${kt.map(t=>`<div class="item" onclick="editTpl('${t.id}')"><div style="flex:1"><div class="t">${esc(t.name)}</div><div class="s">${esc(t.ex.map(x=>x[0]).join(', '))}</div></div><span class="muted">›</span></div>`).join('')}
- <button class="sm" onclick="editTpl(null,'kraft')">＋ Kraft-Vorlage</button>
+ <button class="sm" onclick="editTpl(null,'kraft')">＋ Kraft-Vorlage</button> <button class="sm" onclick="editTpl(null,'home')">＋ Homeworkout-Vorlage</button>
  <p class="lbl" style="margin-top:14px">⏱ Ausdauer & Routinen</p>${at.map(t=>`<div class="item" onclick="editTpl('${t.id}')"><div class="ico">${sp(t.sport).i}</div><div style="flex:1"><div class="t">${esc(t.name)}</div><div class="s">${esc(tplSummary(t))}</div></div><span class="muted">›</span></div>`).join('')}
  <button class="sm" onclick="editTpl(null,'ausdauer')">＋ Ausdauer-Vorlage</button> <button class="sm" onclick="editTpl(null,'routine')">＋ Routine (Dehnen, Koordination …)</button></div>
  <div class="card"><h3>💪 Übungen & Muskeln</h3><p class="muted" style="margin:0 0 6px">Haupt- und Nebenmuskeln bestimmen die Erholungsanzeige. Antippen zum Ändern.</p>
